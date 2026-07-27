@@ -11,22 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->string('description')->nullable();
-            $table->timestamps();
-        });
-
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('phone')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('status')->default('active'); // active, locked
+            $table->string('phone', 20)->nullable();
+            $table->string('avatar')->nullable();
+            $table->enum('role', ['admin', 'staff', 'customer'])->default('customer');
+            $table->enum('status', ['active', 'inactive', 'banned'])->default('active');
+            $table->integer('points')->default(0);
+            $table->string('google_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -52,9 +48,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sessions');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('sessions');
     }
 };

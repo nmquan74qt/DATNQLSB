@@ -1,138 +1,83 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-// Public Controllers
-use App\Http\Controllers\HomeController;
+// Public Homepage
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\PaymentController;
 
-// Auth Controllers
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\NewPasswordController;
+Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/fields', [App\Http\Controllers\PageController::class, 'fields'])->name('fields.index');
+Route::get('/fields/{slug}', [App\Http\Controllers\PageController::class, 'fieldDetail'])->name('field.detail');
+Route::post('/book', [App\Http\Controllers\BookingController::class, 'store'])->name('book');
+Route::get('/api/booking-status/{code}', [App\Http\Controllers\BookingController::class, 'checkPaymentStatus'])->name('api.booking.status');
+Route::get('/api/webhook/simulate/{code}', [App\Http\Controllers\BookingController::class, 'simulateWebhook'])->name('api.webhook.simulate');
+Route::post('/voucher/check', [App\Http\Controllers\BookingController::class, 'checkVoucher'])->name('voucher.check');
+Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
 
-// Customer Portal Controllers
-use App\Http\Controllers\Customer\CustomerPortalController;
-use App\Http\Controllers\Customer\CustomerBookingController;
+Route::get('/payment/create', [PaymentController::class, 'createPayment'])->name('payment.create');
+Route::get('/payment/vnpay-return', [PaymentController::class, 'vnpayReturn'])->name('payment.vnpay.return');
 
-// Admin Portal Controllers
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\FieldController;
-use App\Http\Controllers\Admin\FieldTypeController;
-use App\Http\Controllers\Admin\TimeSlotController;
-use App\Http\Controllers\Admin\BookingController;
-use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\StaffController;
-use App\Http\Controllers\Admin\ServiceController;
-use App\Http\Controllers\Admin\PaymentController;
-use App\Http\Controllers\Admin\InvoiceController;
-use App\Http\Controllers\Admin\ReportController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
-// 1. Public Pages (Accessible by everyone)
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::post('contact', [\App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
-
-// 2. Auth Routes (Guest Only)
+// Auth Routes
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('register', [RegisteredUserController::class, 'store']);
-
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
-
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
-
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
-    Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+    Route::get('login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('login', [AuthController::class, 'login']);
+    Route::get('register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('register', [AuthController::class, 'register']);
 });
 
-// Auth-dependent logout
-Route::middleware('auth')->post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+Route::middleware('auth')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
-// 3. Customer Portal (Auth + Customer Role)
-Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
-    Route::get('dashboard', [CustomerPortalController::class, 'dashboard'])->name('dashboard');
-    
-    // Profile
-    Route::get('profile', [CustomerPortalController::class, 'editProfile'])->name('profile.edit');
-    Route::post('profile', [CustomerPortalController::class, 'updateProfile'])->name('profile.update');
+    // Admin/Staff Area
+    Route::prefix('admin')->middleware('role:admin,staff')->name('admin.')->group(function () {
+        Route::get('/dashboard', function () {
+            if (auth()->user()->role === 'staff') {
+                return view('staff.dashboard');
+            }
+            return app()->make(\App\Http\Controllers\Admin\DashboardController::class)->index();
+        })->name('dashboard');
 
-    // Booking Wizard
-    Route::get('bookings/create', [CustomerBookingController::class, 'create'])->name('bookings.create');
-    Route::post('bookings/check-availability', [CustomerBookingController::class, 'checkAvailability'])->name('bookings.check-availability');
-    Route::post('bookings/store', [CustomerBookingController::class, 'store'])->name('bookings.store');
-    Route::get('bookings/{booking}', [CustomerPortalController::class, 'showBooking'])->name('bookings.show');
-    Route::post('bookings/{booking}/cancel', [CustomerBookingController::class, 'cancel'])->name('bookings.cancel');
-    Route::post('bookings/{booking}/review', [CustomerPortalController::class, 'storeReview'])->name('bookings.review');
-    
-    // Field Reviews
-    Route::get('fields/{field}/reviews', [CustomerBookingController::class, 'getFieldReviews'])->name('fields.reviews');
+        Route::resource('fields', \App\Http\Controllers\FieldController::class);
 
-    // Payments
-    Route::get('payment/vnpay-return', [\App\Http\Controllers\Customer\PaymentController::class, 'vnpayReturn'])->name('payment.vnpay.return');
-    Route::get('payment/process/{booking}', [\App\Http\Controllers\Customer\PaymentController::class, 'process'])->name('payment.process');
-    Route::get('payment/momo/{booking}', [\App\Http\Controllers\Customer\PaymentController::class, 'momoQR'])->name('payment.momo.qr');
-});
+        // Core Management
+        Route::get('/bookings', [\App\Http\Controllers\Admin\BookingController::class, 'index'])->name('bookings.index');
+        Route::post('/bookings', [\App\Http\Controllers\Admin\BookingController::class, 'store'])->name('bookings.store');
+        Route::put('/bookings/{id}/status', [\App\Http\Controllers\Admin\BookingController::class, 'updateStatus'])->name('bookings.update-status');
+        Route::get('/bookings/calendar-data', [\App\Http\Controllers\Admin\BookingController::class, 'calendarData'])->name('bookings.calendar');
+        Route::get('/customers', [\App\Http\Controllers\Admin\CustomerController::class, 'index'])->name('customers.index');
+        Route::put('/customers/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'update'])->name('customers.update');
+        Route::delete('/customers/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'destroy'])->name('customers.destroy');
+        
+        // HR / Staff Management
+        Route::middleware('role:admin')->group(function() {
+            Route::get('/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+            Route::get('/payments/export', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])->name('payments.export');
 
-// 4. Admin & Staff Portal (Auth + Staff/Manager Role)
-Route::middleware(['auth', 'role:manager,staff'])->prefix('admin')->name('admin.')->group(function () {
-    
-    // Shareable Dashboard
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+            Route::get('/staff', [\App\Http\Controllers\StaffController::class, 'index'])->name('staff.index');
+            Route::post('/staff', [\App\Http\Controllers\StaffController::class, 'store'])->name('staff.store');
+            Route::put('/staff/{id}', [\App\Http\Controllers\StaffController::class, 'update'])->name('staff.update');
+            Route::delete('/staff/{id}', [\App\Http\Controllers\StaffController::class, 'destroy'])->name('staff.destroy');
+            Route::post('/staff/attendance', [\App\Http\Controllers\StaffController::class, 'markAttendance'])->name('staff.attendance');
+            Route::post('/staff/payroll', [\App\Http\Controllers\StaffController::class, 'generatePayroll'])->name('staff.payroll');
 
-    // Bookings Management
-    Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
-    Route::get('bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
-    Route::post('bookings/{booking}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
-    Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
-    Route::post('bookings/{booking}/add-services', [BookingController::class, 'addServices'])->name('bookings.add-services');
-    Route::delete('bookings/{booking}/remove-service/{order}', [BookingController::class, 'removeService'])->name('bookings.remove-service');
-    Route::post('bookings/{booking}/checkout', [BookingController::class, 'checkout'])->name('bookings.checkout');
+            // System Admin
+            Route::match(['get', 'post'], '/system/settings', [\App\Http\Controllers\Admin\SystemController::class, 'settings'])->name('system.settings');
+            Route::post('/system/backup', [\App\Http\Controllers\Admin\SystemController::class, 'backupDatabase'])->name('system.backup');
+        });
 
-    // Customers Directory
-    Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
-    Route::get('customers/create', [CustomerController::class, 'create'])->name('customers.create');
-    Route::post('customers/store', [CustomerController::class, 'store'])->name('customers.store');
-    Route::get('customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
-    Route::post('customers/{customer}/update', [CustomerController::class, 'update'])->name('customers.update');
-    Route::post('customers/{customer}/toggle-status', [CustomerController::class, 'toggleStatus'])->name('customers.toggle-status');
+        // Marketing / Vouchers / Blog
+        Route::get('/vouchers', [\App\Http\Controllers\VoucherController::class, 'index'])->name('vouchers.index');
+        Route::post('/vouchers', [\App\Http\Controllers\VoucherController::class, 'store'])->name('vouchers.store');
+        Route::put('/vouchers/{id}', [\App\Http\Controllers\VoucherController::class, 'update'])->name('vouchers.update');
+        Route::delete('/vouchers/{id}', [\App\Http\Controllers\VoucherController::class, 'destroy'])->name('vouchers.destroy');
+        Route::resource('/posts', \App\Http\Controllers\Admin\PostController::class);
+    });
 
-    // Services Catalog
-    Route::resource('services', ServiceController::class)->except(['show']);
-
-    // Payments Records
-    Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
-
-    // Invoices Management
-    Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-    Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
-
-    // 5. Manager ONLY Routes (Auth + Manager Role)
-    Route::middleware('role:manager')->group(function () {
-        // Football Fields Settings
-        Route::resource('fields', FieldController::class)->except(['show']);
-        Route::resource('field-types', FieldTypeController::class)->except(['show']);
-        Route::resource('time-slots', TimeSlotController::class)->except(['show']);
-
-        // Staff Accounts Settings
-        Route::get('staffs', [StaffController::class, 'index'])->name('staffs.index');
-        Route::get('staffs/create', [StaffController::class, 'create'])->name('staffs.create');
-        Route::post('staffs/store', [StaffController::class, 'store'])->name('staffs.store');
-        Route::get('staffs/{staff}/edit', [StaffController::class, 'edit'])->name('staffs.edit');
-        Route::post('staffs/{staff}/update', [StaffController::class, 'update'])->name('staffs.update');
-        Route::post('staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])->name('staffs.toggle-status');
-        Route::delete('staffs/{staff}', [StaffController::class, 'destroy'])->name('staffs.destroy');
-
-        // General Financial Reports
-        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('reports/export-csv', [ReportController::class, 'exportCsv'])->name('reports.export-csv');
+    // Customer Area
+    Route::prefix('customer')->middleware('role:customer')->name('customer.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\CustomerController::class, 'dashboard'])->name('dashboard');
     });
 });
-

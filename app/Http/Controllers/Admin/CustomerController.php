@@ -3,75 +3,58 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Role;
-use App\Http\Requests\StoreUserRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $customerRole = Role::where('name', 'customer')->first();
-        $query = User::where('role_id', $customerRole->id);
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%");
-            });
-        }
-
-        $customers = $query->paginate(10)->withQueryString();
+        $customers = \App\Models\User::where('role', 'customer')
+            ->with(['bookings' => function($q) {
+                $q->where('status', 'completed');
+            }])
+            ->withCount(['bookings as completed_bookings_count' => function($q) {
+                $q->where('status', 'completed');
+            }])
+            ->latest()
+            ->paginate(10);
+            
         return view('admin.customers.index', compact('customers'));
     }
 
-    public function create()
+    public function update(Request $request, $id)
     {
-        $roles = Role::where('name', 'customer')->get();
-        return view('admin.customers.create', compact('roles'));
-    }
+        $customer = \App\Models\User::where('role', 'customer')->findOrFail($id);
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'points' => 'nullable|integer|min:0'
+        ]);
 
-    public function store(StoreUserRequest $request)
-    {
-        $data = $request->validated();
-        $data['password'] = Hash::make($data['password']);
+        $customer->update([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'points' => $request->points ?? $customer->points
+        ]);
 
-        User::create($data);
-
-        return redirect()->route('admin.customers.index')->with('success', 'Tài khoản khách hàng mới đã được tạo.');
-    }
-
-    public function edit(User $customer)
-    {
-        $roles = Role::where('name', 'customer')->get();
-        return view('admin.customers.edit', compact('customer', 'roles'));
-    }
-
-    public function update(StoreUserRequest $request, User $customer)
-    {
-        $data = $request->validated();
-
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
+        if ($request->filled('password')) {
+            $customer->update(['password' => \Illuminate\Support\Facades\Hash::make($request->password)]);
         }
 
-        $customer->update($data);
-
-        return redirect()->route('admin.customers.index')->with('success', 'Thông tin khách hàng đã được cập nhật.');
+        return redirect()->route('admin.customers.index')->with('success', 'Đã cập nhật thông tin khách hàng!');
     }
 
-    public function toggleStatus(User $customer)
+    public function destroy($id)
     {
-        $customer->status = $customer->status === 'active' ? 'locked' : 'active';
-        $customer->save();
+        $customer = \App\Models\User::where('role', 'customer')->findOrFail($id);
+        
+        // Prevent deleting if they have bookings
+        if ($customer->bookings()->exists()) {
+            return redirect()->route('admin.customers.index')->with('error', 'Không thể xóa khách hàng đã có lịch sử đặt sân!');
+        }
 
-        $msg = $customer->status === 'active' ? 'Đã mở khóa tài khoản khách hàng.' : 'Đã khóa tài khoản khách hàng.';
-        return redirect()->route('admin.customers.index')->with('success', $msg);
+        $customer->delete();
+        return redirect()->route('admin.customers.index')->with('success', 'Đã xóa khách hàng thành công!');
     }
 }

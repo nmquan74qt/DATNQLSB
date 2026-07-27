@@ -2,26 +2,21 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['role_id', 'name', 'email', 'phone', 'password', 'status', 'avatar'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    protected $guarded = [];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -30,9 +25,14 @@ class User extends Authenticatable
         ];
     }
 
-    public function role()
+    public function level()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Level::class);
+    }
+
+    public function achievements()
+    {
+        return $this->hasMany(UserAchievement::class);
     }
 
     public function bookings()
@@ -40,28 +40,23 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class);
     }
 
-    public function invoices()
+    public function reviews()
     {
-        return $this->hasMany(Invoice::class);
+        return $this->hasMany(Review::class);
     }
 
-    public function isManager(): bool
+    public function attendances()
     {
-        return $this->role && $this->role->name === 'manager';
+        return $this->hasMany(Attendance::class);
     }
 
-    public function isStaff(): bool
+    public function payrolls()
     {
-        return $this->role && $this->role->name === 'staff';
+        return $this->hasMany(Payroll::class);
     }
 
-    public function isCustomer(): bool
+    public function posts()
     {
-        return $this->role && $this->role->name === 'customer';
-    }
-
-    public function isLocked(): bool
-    {
-        return $this->status === 'locked';
+        return $this->hasMany(Post::class, 'author_id');
     }
 }

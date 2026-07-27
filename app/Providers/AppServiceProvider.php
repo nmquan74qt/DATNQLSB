@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            \App\Repositories\Interfaces\FieldRepositoryInterface::class,
+            \App\Repositories\Eloquent\FieldRepository::class
+        );
     }
 
     /**
@@ -20,6 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Paginator::useBootstrapFive();
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\User::class, \App\Policies\StaffPolicy::class);
     }
 }
