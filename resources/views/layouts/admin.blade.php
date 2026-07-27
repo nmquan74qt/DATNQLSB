@@ -75,12 +75,7 @@
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Sân Bóng</span>
                 </a>
 
-                @if(auth()->user()->role === 'admin')
-                <a href="{{ route('admin.staff.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.staff.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Nhân Sự">
-                    <i class="fa-solid fa-users-gear w-6 text-center text-lg"></i>
-                    <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Nhân Sự & Lương</span>
-                </a>
-                @endif
+
 
                 <a href="{{ route('admin.vouchers.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.vouchers.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Khuyến Mãi">
                     <i class="fa-solid fa-ticket w-6 text-center text-lg"></i>
@@ -210,6 +205,8 @@
             <!-- Main Scrollable Content -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 lg:p-8">
                 
+                @yield('header')
+
                 @if(session('success'))
                     <div class="mb-6 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 px-4 py-3 rounded-xl flex items-center justify-between animate-slide-up" x-data="{ show: true }" x-show="show">
                         <div class="flex items-center gap-3">

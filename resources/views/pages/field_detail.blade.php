@@ -221,8 +221,8 @@
                                     <span x-show="!isProcessing" class="flex items-center"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png" class="h-5 w-auto object-contain inline-block mr-2 bg-white rounded-sm p-0.5" alt="VNPay"> Thanh toán VNPay</span>
                                     <span x-show="isProcessing"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...</span>
                                 </button>
-                                <button @click="checkout('momo')" :disabled="isProcessing" class="flex-1 bg-[#A50064] hover:bg-[#8A0053] text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-[#A50064]/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0">
-                                    <span x-show="!isProcessing" class="flex items-center"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" class="h-5 w-5 object-contain inline-block mr-2 rounded-sm" alt="MoMo"> Thanh toán MoMo</span>
+                                <button @click="checkout('cash')" :disabled="isProcessing" class="flex-1 bg-[#10b981] hover:bg-[#059669] text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-[#10b981]/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0">
+                                    <span x-show="!isProcessing" class="flex items-center"><i class="fa-solid fa-money-bill-wave text-xl mr-2"></i> Thanh toán Tiền mặt</span>
                                     <span x-show="isProcessing"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...</span>
                                 </button>
                             </div>
@@ -449,12 +449,28 @@
                             window.location.href = data.redirect_url;
                         } else {
                             Swal.close();
-                            // Open QR Modal for MoMo
-                            this.$dispatch('open-payment-modal', {
-                                method: paymentMethod,
-                                amount: this.finalPrice,
-                                code: data.booking_code
-                            });
+                            if (paymentMethod === 'cash') {
+                                // Show success for cash
+                                if (typeof triggerConfetti === 'function') triggerConfetti();
+                                else window.dispatchEvent(new CustomEvent('trigger-confetti'));
+                                
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Đặt sân thành công!',
+                                    html: `Mã đơn của bạn là: <b>${data.booking_code}</b><br>Vui lòng đến sân đúng giờ và thanh toán tại quầy.`,
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'Đóng'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                // Open QR Modal for other methods (if any)
+                                this.$dispatch('open-payment-modal', {
+                                    method: paymentMethod,
+                                    amount: this.finalPrice,
+                                    code: data.booking_code
+                                });
+                            }
                         }
                     } else {
                         Swal.close();

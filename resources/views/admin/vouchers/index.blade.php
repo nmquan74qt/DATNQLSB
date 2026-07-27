@@ -56,7 +56,7 @@
                     <div class="pt-4 border-t border-dashed border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs relative">
                         <span class="text-slate-500">Đã dùng: <strong class="text-slate-700 dark:text-slate-300">{{ $voucher->used_count }}/{{ $voucher->max_uses }}</strong></span>
                         
-                        <div class="group-hover/card:opacity-0 transition-opacity absolute right-0">
+                        <div class="group-hover/card:opacity-0 transition-opacity absolute right-0 pointer-events-none">
                             @if($voucher->is_active)
                                 <span class="text-emerald-500 font-bold"><i class="fa-solid fa-circle text-[8px]"></i> Đang chạy</span>
                             @else
@@ -64,8 +64,20 @@
                             @endif
                         </div>
 
-                        <div class="opacity-0 group-hover/card:opacity-100 transition-opacity flex gap-2 absolute right-0">
-                            <button onclick="editVoucher({{ htmlspecialchars(json_encode($voucher)) }})" class="w-6 h-6 rounded bg-amber-50 text-amber-500 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-colors" title="Sửa"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                        <div class="opacity-0 group-hover/card:opacity-100 transition-opacity flex gap-2 absolute right-0 z-20">
+                            <button type="button" 
+                                data-id="{{ $voucher->id }}"
+                                data-code="{{ $voucher->code }}"
+                                data-name="{{ $voucher->name }}"
+                                data-discount-percent="{{ $voucher->discount_percent }}"
+                                data-discount-amount="{{ $voucher->discount_amount }}"
+                                data-max-uses="{{ $voucher->max_uses }}"
+                                data-valid-from="{{ $voucher->valid_from }}"
+                                data-valid-to="{{ $voucher->valid_to }}"
+                                data-is-active="{{ $voucher->is_active }}"
+                                onclick="editVoucher(this)" class="w-6 h-6 rounded bg-amber-50 text-amber-500 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-colors" title="Sửa">
+                                <i class="fa-solid fa-pen text-[10px] pointer-events-none"></i>
+                            </button>
                             <form action="{{ route('admin.vouchers.destroy', $voucher->id) }}" method="POST" class="m-0 p-0" onsubmit="return confirm('Chắc chắn xóa Voucher này?')">
                                 @csrf
                                 @method('DELETE')
@@ -125,11 +137,24 @@
                     <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Giới hạn số lượt dùng</label>
                     <input type="number" name="max_uses" value="100" required class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary">
                 </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ngày bắt đầu</label>
+                        <input type="datetime-local" name="valid_from" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ngày kết thúc</label>
+                        <input type="datetime-local" name="valid_to" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary">
+                    </div>
+                </div>
                 
                 <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 transition-colors">Tạo Voucher Phát Hành Ngay</button>
             </div>
         </form>
     </div>
+</div>
+
 <!-- Modal Edit Voucher -->
 <div id="editVoucherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
     <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all p-6">
@@ -170,6 +195,17 @@
                     <input type="number" id="edit_max_uses" name="max_uses" required class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary">
                 </div>
 
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ngày bắt đầu</label>
+                        <input type="datetime-local" id="edit_valid_from" name="valid_from" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ngày kết thúc</label>
+                        <input type="datetime-local" id="edit_valid_to" name="valid_to" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary">
+                    </div>
+                </div>
+
                 <div class="flex items-center gap-2 mt-4">
                     <input type="hidden" name="is_active" value="0">
                     <input type="checkbox" id="edit_is_active" name="is_active" value="1" class="w-4 h-4 text-primary bg-slate-100 border-slate-300 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
@@ -179,22 +215,40 @@
                 <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 transition-colors">Lưu Thay Đổi</button>
             </div>
         </form>
-    </div>
-</div>
-
-@endsection
-
-@push('scripts')
 <script>
-    function editVoucher(voucher) {
-        document.getElementById('editVoucherForm').action = `{{ url('admin/vouchers') }}/${voucher.id}`;
-        document.getElementById('edit_code').value = voucher.code;
-        document.getElementById('edit_name').value = voucher.name;
-        document.getElementById('edit_discount_percent').value = voucher.discount_percent || '';
-        document.getElementById('edit_discount_amount').value = voucher.discount_amount || '';
-        document.getElementById('edit_max_uses').value = voucher.max_uses;
-        document.getElementById('edit_is_active').checked = voucher.is_active;
-        document.getElementById('editVoucherModal').classList.remove('hidden');
+    function editVoucher(btn) {
+        // Test nếu hàm được gọi
+        console.log("Button clicked!", btn);
+        try {
+            const d = btn.dataset;
+            
+            if (!d.id) {
+                alert('Lỗi: Nút bấm không có ID Voucher.');
+                return;
+            }
+
+            document.getElementById('editVoucherForm').action = `{{ url('admin/vouchers') }}/${d.id}`;
+            document.getElementById('edit_code').value = d.code || '';
+            document.getElementById('edit_name').value = d.name || '';
+            document.getElementById('edit_discount_percent').value = d.discountPercent || '';
+            document.getElementById('edit_discount_amount').value = d.discountAmount || '';
+            document.getElementById('edit_max_uses').value = d.maxUses || 100;
+            
+            const formatDateTime = (dateStr) => {
+                if (!dateStr || dateStr === 'null' || dateStr === 'undefined') return '';
+                return String(dateStr).replace(' ', 'T').slice(0, 16);
+            };
+
+            document.getElementById('edit_valid_from').value = formatDateTime(d.validFrom);
+            document.getElementById('edit_valid_to').value = formatDateTime(d.validTo);
+            document.getElementById('edit_is_active').checked = d.isActive == '1';
+            
+            document.getElementById('editVoucherModal').classList.remove('hidden');
+        } catch (error) {
+            console.error('Lỗi khi mở modal sửa:', error);
+            alert('Lỗi: ' + error.message);
+        }
     }
 </script>
-@endpush
+
+@endsection

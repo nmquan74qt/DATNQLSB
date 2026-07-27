@@ -50,11 +50,34 @@ class BookingController extends Controller
 
         $notes = 'Đang chờ thanh toán qua ' . $request->payment_method;
         if ($request->voucher_code) {
-            $voucher = \App\Models\Voucher::where('code', $request->voucher_code)->first();
-            if ($voucher) {
-                $voucher->increment('used_count');
-                $notes .= ' (Có áp dụng mã ' . $request->voucher_code . ')';
+            $voucher = \App\Models\Voucher::where('code', strtoupper($request->voucher_code))
+                ->where('is_active', true)
+                ->where('used_count', '<', \Illuminate\Support\Facades\DB::raw('max_uses'))
+                ->where(function($q) {
+                    $q->whereNull('valid_from')->orWhere('valid_from', '<=', now());
+                })
+                ->where(function($q) {
+                    $q->whereNull('valid_to')->orWhere('valid_to', '>=', now());
+                })
+                ->first();
+
+            if (!$voucher) {
+                return response()->json(['success' => false, 'message' => 'Mã Voucher không hợp lệ, đã hết hạn hoặc hết lượt sử dụng.']);
             }
+
+            // Kiểm tra user đã sử dụng chưa
+            $userId = auth()->id() ?? 1;
+            $hasUsed = Booking::where('user_id', $userId)
+                ->where('notes', 'like', '%Có áp dụng mã ' . $voucher->code . '%')
+                ->whereIn('status', ['pending', 'confirmed', 'completed'])
+                ->exists();
+
+            if ($hasUsed) {
+                return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã Voucher này rồi.']);
+            }
+
+            $voucher->increment('used_count');
+            $notes .= ' (Có áp dụng mã ' . $voucher->code . ')';
         }
 
         $bookingCode = $request->booking_code ?? ('BK' . strtoupper(Str::random(6)));
@@ -119,6 +142,17 @@ class BookingController extends Controller
 
         if (!$voucher) {
             return response()->json(['success' => false, 'message' => 'Mã Voucher không hợp lệ, đã hết hạn hoặc hết lượt sử dụng.']);
+        }
+
+        // Kiểm tra user đã sử dụng chưa
+        $userId = auth()->id() ?? 1;
+        $hasUsed = Booking::where('user_id', $userId)
+            ->where('notes', 'like', '%Có áp dụng mã ' . $voucher->code . '%')
+            ->whereIn('status', ['pending', 'confirmed', 'completed'])
+            ->exists();
+
+        if ($hasUsed) {
+            return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã Voucher này cho một đơn đặt sân trước đó.']);
         }
 
         return response()->json([
