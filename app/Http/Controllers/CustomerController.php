@@ -31,6 +31,35 @@ class CustomerController extends Controller
         // Query real bookings
         $bookings = Booking::where('user_id', $user->id)->with(['details.field', 'details.timeSlot'])->latest()->take(5)->get();
 
-        return view('customer.dashboard', compact('user', 'level', 'nextLevel', 'bookings'));
+        // Query wallet transactions
+        $walletTransactions = \App\Models\WalletTransaction::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+
+        return view('customer.dashboard', compact('user', 'level', 'nextLevel', 'bookings', 'walletTransactions'));
+    }
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'dob' => 'nullable|date',
+            'bank_name' => 'nullable|string|max:255',
+            'bank_account' => 'nullable|string|max:255',
+            'bank_account_name' => 'nullable|string|max:255',
+        ]);
+
+        $user = Auth::user();
+        $user->name = $request->name;
+        $user->phone = $request->phone;
+        $user->dob = $request->dob;
+        $user->bank_name = $request->bank_name;
+        $user->bank_account = $request->bank_account;
+        $user->bank_account_name = $request->bank_account_name;
+        
+        // Save avatar if we implement file upload later
+        // $user->avatar = ...
+
+        $user->save();
+
+        return redirect()->back()->with('success', 'Đã cập nhật thông tin cá nhân thành công!');
     }
 }

@@ -11,10 +11,8 @@ use App\Http\Controllers\PaymentController;
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/fields', [App\Http\Controllers\PageController::class, 'fields'])->name('fields.index');
 Route::get('/fields/{slug}', [App\Http\Controllers\PageController::class, 'fieldDetail'])->name('field.detail');
-Route::post('/book', [App\Http\Controllers\BookingController::class, 'store'])->name('book');
 Route::get('/api/booking-status/{code}', [App\Http\Controllers\BookingController::class, 'checkPaymentStatus'])->name('api.booking.status');
 Route::get('/api/webhook/simulate/{code}', [App\Http\Controllers\BookingController::class, 'simulateWebhook'])->name('api.webhook.simulate');
-Route::post('/voucher/check', [App\Http\Controllers\BookingController::class, 'checkVoucher'])->name('voucher.check');
 Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
 
 Route::get('/payment/create', [PaymentController::class, 'createPayment'])->name('payment.create');
@@ -30,15 +28,14 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Protected Booking Actions
+    Route::post('/book', [App\Http\Controllers\BookingController::class, 'store'])->name('book');
+    Route::post('/voucher/check', [App\Http\Controllers\BookingController::class, 'checkVoucher'])->name('voucher.check');
 
-    // Admin/Staff Area
-    Route::prefix('admin')->middleware('role:admin,staff')->name('admin.')->group(function () {
-        Route::get('/dashboard', function () {
-            if (auth()->user()->role === 'staff') {
-                return view('staff.dashboard');
-            }
-            return app()->make(\App\Http\Controllers\Admin\DashboardController::class)->index();
-        })->name('dashboard');
+    // Admin Area
+    Route::prefix('admin')->middleware('role:admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
         Route::resource('fields', \App\Http\Controllers\FieldController::class);
 
@@ -51,22 +48,13 @@ Route::middleware('auth')->group(function () {
         Route::put('/customers/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'update'])->name('customers.update');
         Route::delete('/customers/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'destroy'])->name('customers.destroy');
         
-        // HR / Staff Management
-        Route::middleware('role:admin')->group(function() {
-            Route::get('/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
-            Route::get('/payments/export', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])->name('payments.export');
+        // Finance Management
+        Route::get('/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+        Route::get('/payments/export', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])->name('payments.export');
 
-            Route::get('/staff', [\App\Http\Controllers\StaffController::class, 'index'])->name('staff.index');
-            Route::post('/staff', [\App\Http\Controllers\StaffController::class, 'store'])->name('staff.store');
-            Route::put('/staff/{id}', [\App\Http\Controllers\StaffController::class, 'update'])->name('staff.update');
-            Route::delete('/staff/{id}', [\App\Http\Controllers\StaffController::class, 'destroy'])->name('staff.destroy');
-            Route::post('/staff/attendance', [\App\Http\Controllers\StaffController::class, 'markAttendance'])->name('staff.attendance');
-            Route::post('/staff/payroll', [\App\Http\Controllers\StaffController::class, 'generatePayroll'])->name('staff.payroll');
-
-            // System Admin
-            Route::match(['get', 'post'], '/system/settings', [\App\Http\Controllers\Admin\SystemController::class, 'settings'])->name('system.settings');
-            Route::post('/system/backup', [\App\Http\Controllers\Admin\SystemController::class, 'backupDatabase'])->name('system.backup');
-        });
+        // System Admin
+        Route::match(['get', 'post'], '/system/settings', [\App\Http\Controllers\Admin\SystemController::class, 'settings'])->name('system.settings');
+        Route::post('/system/backup', [\App\Http\Controllers\Admin\SystemController::class, 'backupDatabase'])->name('system.backup');
 
         // Marketing / Vouchers / Blog
         Route::get('/vouchers', [\App\Http\Controllers\VoucherController::class, 'index'])->name('vouchers.index');
@@ -79,5 +67,6 @@ Route::middleware('auth')->group(function () {
     // Customer Area
     Route::prefix('customer')->middleware('role:customer')->name('customer.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\CustomerController::class, 'dashboard'])->name('dashboard');
+        Route::put('/profile', [\App\Http\Controllers\CustomerController::class, 'updateProfile'])->name('profile.update');
     });
 });

@@ -118,6 +118,25 @@ class BookingController extends Controller
             }
         }
         
+        // Refund if cancelled and paid
+        if ($request->status === 'cancelled' && $booking->status !== 'cancelled') {
+            $payment = \App\Models\Payment::where('booking_id', $booking->id)->where('status', 'success')->first();
+            
+            if ($payment && $booking->user) {
+                // Add money to wallet
+                $booking->user->wallet_balance += $booking->total_amount;
+                $booking->user->save();
+                
+                // Create transaction history
+                \App\Models\WalletTransaction::create([
+                    'user_id' => $booking->user_id,
+                    'amount' => $booking->total_amount,
+                    'type' => 'refund',
+                    'description' => 'Hoàn tiền hủy đơn đặt sân ' . $booking->booking_code
+                ]);
+            }
+        }
+        
         $booking->update(['status' => $request->status]);
 
         return back()->with('success', 'Đã cập nhật trạng thái đơn đặt sân!');

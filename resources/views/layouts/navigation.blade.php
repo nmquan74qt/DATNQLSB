@@ -36,9 +36,8 @@
                             @if(auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
                                 <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-primary/5 hover:text-primary transition-colors"><i class="fa-solid fa-chart-line w-5"></i> Trang Quản Trị</a>
                             @else
-                                <a href="{{ route('customer.dashboard') }}" class="block px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-primary/5 hover:text-primary transition-colors"><i class="fa-regular fa-calendar-check w-5"></i> Lịch Đặt Của Tôi</a>
+                                <a href="{{ route('customer.dashboard') }}" class="block px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-primary/5 hover:text-primary transition-colors"><i class="fa-regular fa-user w-5"></i> Tài Khoản</a>
                             @endif
-                            <a href="#" class="block px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-primary/5 hover:text-primary transition-colors"><i class="fa-regular fa-user w-5"></i> Tài Khoản</a>
                             <div class="h-px bg-slate-100 my-1"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -67,6 +66,7 @@
         <div class="px-4 pt-2 pb-6 space-y-1">
             <a href="{{ route('home') }}" class="block px-3 py-3 rounded-xl text-base font-bold text-slate-700 hover:bg-slate-50 hover:text-primary">Trang Chủ</a>
             <a href="{{ route('fields.index') }}" class="block px-3 py-3 rounded-xl text-base font-bold text-slate-600 hover:bg-slate-50 hover:text-primary">Đặt Sân</a>
+            <a href="{{ route('fields.index') }}" class="block px-3 py-3 rounded-xl text-base font-bold text-slate-600 hover:bg-slate-50 hover:text-primary">Bảng Giá</a>
             <a href="{{ route('blog.index') }}" class="block px-3 py-3 rounded-xl text-base font-bold text-slate-600 hover:bg-slate-50 hover:text-primary">Tin Tức</a>
             
             <div class="h-px bg-slate-100 my-2"></div>
@@ -81,6 +81,8 @@
                 </div>
                 @if(auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
                     <a href="{{ route('admin.dashboard') }}" class="block px-3 py-3 rounded-xl text-base font-bold text-slate-600 hover:bg-slate-50 hover:text-primary"><i class="fa-solid fa-chart-line w-6"></i> Trang Quản Trị</a>
+                @else
+                    <a href="{{ route('customer.dashboard') }}" class="block px-3 py-3 rounded-xl text-base font-bold text-slate-600 hover:bg-slate-50 hover:text-primary"><i class="fa-regular fa-user w-6"></i> Tài Khoản</a>
                 @endif
                 <form method="POST" action="{{ route('logout') }}" class="mt-2">
                     @csrf

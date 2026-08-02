@@ -21,13 +21,7 @@ class DummyDataSeeder extends Seeder
             'role' => 'admin',
             'phone' => '0901234567',
         ]);
-        User::create([
-            'name' => 'Lê Nhân Viên',
-            'email' => 'staff@pitchmanage.com',
-            'password' => Hash::make('password'),
-            'role' => 'staff',
-            'phone' => '0909999999',
-        ]);
+
         $customer = User::create([
             'name' => 'Lê Khách Hàng',
             'email' => 'customer@pitchmanage.com',

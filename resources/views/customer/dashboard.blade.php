@@ -56,6 +56,20 @@
                                     </div>
                                     <p class="text-xs text-slate-500 text-center">Bạn đã đạt cấp bậc cao nhất!</p>
                                 @endif
+                                
+                                <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+                                    <div class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                                <i class="fa-solid fa-wallet"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Ví cá nhân</p>
+                                                <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($user->wallet_balance ?? 0) }} đ</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -87,86 +101,205 @@
                 </div>
 
                 <!-- Main Dashboard Tabs (Grid 8/12) -->
-                <div class="col-span-12 lg:col-span-8 space-y-6" data-aos="fade-up">
+                <div class="col-span-12 lg:col-span-8 space-y-6" data-aos="fade-up" x-data="{ tab: 'profile' }">
                     
-                    <!-- Quick Stats -->
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm text-center transform transition-transform hover:-translate-y-1">
-                            <i class="fa-solid fa-calendar-check text-3xl text-primary mb-3"></i>
-                            <h4 class="text-2xl font-bold text-slate-900 dark:text-white font-heading">12</h4>
-                            <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Đã đặt sân</p>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm text-center transform transition-transform hover:-translate-y-1">
-                            <i class="fa-solid fa-ban text-3xl text-red-500 mb-3"></i>
-                            <h4 class="text-2xl font-bold text-slate-900 dark:text-white font-heading">0</h4>
-                            <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Hủy sân</p>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm text-center transform transition-transform hover:-translate-y-1">
-                            <i class="fa-solid fa-star text-3xl text-warning mb-3"></i>
-                            <h4 class="text-2xl font-bold text-slate-900 dark:text-white font-heading">5</h4>
-                            <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Đánh giá</p>
-                        </div>
+                    <!-- Tabs Navigation -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-2 border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row gap-2">
+                        <button @click="tab = 'profile'" :class="tab === 'profile' ? 'bg-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'" class="flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-id-badge"></i> Thông Tin Cá Nhân
+                        </button>
+                        <button @click="tab = 'history'" :class="tab === 'history' ? 'bg-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'" class="flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Đặt Sân
+                        </button>
+                        <button @click="tab = 'wallet'" :class="tab === 'wallet' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'" class="flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-wallet"></i> Lịch Sử Ví
+                        </button>
                     </div>
 
-                    <!-- Bookings History -->
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white">Lịch Sử Đặt Sân</h3>
-                            <a href="javascript:void(0);" class="text-sm font-medium text-primary hover:underline">Xem tất cả</a>
-                        </div>
+                    <!-- Profile Tab -->
+                    <div x-show="tab === 'profile'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white mb-6 border-b pb-4">Cập Nhật Thông Tin</h3>
                         
-                        @if($bookings->isEmpty())
-                            <!-- Empty State Illustration -->
-                            <div class="text-center py-12">
-                                <div class="w-32 h-32 mx-auto bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-4xl text-slate-300 dark:text-slate-600 mb-4 animate-bounce">
-                                    <i class="fa-regular fa-calendar-xmark"></i>
-                                </div>
-                                <h4 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Chưa có lượt đặt sân nào</h4>
-                                <p class="text-sm text-slate-500 mb-6 max-w-sm mx-auto">Hãy bắt đầu trận đấu đầu tiên của bạn để tích lũy điểm thưởng nhé!</p>
-                                <a href="{{ route('fields.index') }}" class="bg-primary text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-blue-600 transition-colors inline-block magnetic-btn"><span class="btn-text">Đặt Sân Ngay</span></a>
-                            </div>
-                        @else
-                            <!-- Custom Booking List -->
-                            <div class="space-y-4">
-                                @foreach($bookings as $booking)
-                                    @foreach($booking->details as $detail)
-                                    <div class="flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
-                                        <div class="flex items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0">
-                                            <div class="w-14 h-14 rounded-xl overflow-hidden shadow-sm flex-shrink-0 relative bg-slate-100 flex items-center justify-center text-primary text-2xl">
-                                                <i class="fa-solid fa-futbol"></i>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{{ $detail->field->name ?? 'Sân' }}</h4>
-                                                <p class="text-xs text-slate-500 flex items-center gap-2"><i class="fa-regular fa-clock"></i> {{ \Carbon\Carbon::parse($detail->timeSlot->start_time)->format('H:i') ?? '' }} - {{ \Carbon\Carbon::parse($detail->timeSlot->end_time)->format('H:i') ?? '' }} | {{ \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') }}</p>
-                                                <p class="text-[10px] font-mono text-slate-400 mt-1">Mã đơn: {{ $booking->booking_code }}</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                                            <div class="text-right">
-                                                <p class="font-bold text-slate-900 dark:text-white">{{ number_format($booking->total_amount) }}đ</p>
-                                                
-                                                @if($booking->status == 'completed')
-                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-600 uppercase tracking-wider">Hoàn thành</span>
-                                                @elseif($booking->status == 'pending')
-                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-600 uppercase tracking-wider">Chờ xác nhận</span>
-                                                @elseif($booking->status == 'confirmed')
-                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 uppercase tracking-wider">Đã xác nhận</span>
-                                                @else
-                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase tracking-wider">Đã hủy</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                @endforeach
+                        @if(session('success'))
+                            <div class="bg-emerald-50 text-emerald-600 p-4 rounded-xl mb-6 font-medium border border-emerald-100 flex items-center gap-3">
+                                <i class="fa-solid fa-circle-check text-xl"></i> {{ session('success') }}
                             </div>
                         @endif
+
+                        <form action="{{ route('customer.profile.update') }}" method="POST" class="space-y-6">
+                            @csrf
+                            @method('PUT')
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Họ Tên -->
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Họ và Tên</label>
+                                    <input type="text" name="name" value="{{ old('name', $user->name) }}" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all" required>
+                                </div>
+
+                                <!-- Số Điện Thoại -->
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Số Điện Thoại</label>
+                                    <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all">
+                                </div>
+
+                                <!-- Ngày Sinh -->
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Ngày Sinh</label>
+                                    <input type="date" name="dob" value="{{ old('dob', $user->dob) }}" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all">
+                                </div>
+
+                                <!-- Ngân Hàng -->
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Tên Ngân Hàng</label>
+                                    <input type="text" name="bank_name" value="{{ old('bank_name', $user->bank_name) }}" placeholder="VD: Vietcombank" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all">
+                                </div>
+
+                                <!-- Số Tài Khoản -->
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Số Tài Khoản</label>
+                                    <input type="text" name="bank_account" value="{{ old('bank_account', $user->bank_account) }}" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all">
+                                </div>
+
+                                <!-- Tên Chủ Thẻ -->
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Tên Chủ Tài Khoản</label>
+                                    <input type="text" name="bank_account_name" value="{{ old('bank_account_name', $user->bank_account_name) }}" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all uppercase">
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4 border-t border-slate-100 flex justify-end">
+                                <button type="submit" class="bg-primary hover:bg-secondary text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/30 transform hover:-translate-y-1 transition-all">
+                                    Lưu Thay Đổi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- History Tab -->
+                    <div x-show="tab === 'history'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="space-y-6">
+                        
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm text-center transform transition-transform hover:-translate-y-1">
+                                <i class="fa-solid fa-calendar-check text-3xl text-primary mb-3"></i>
+                                <h4 class="text-2xl font-bold text-slate-900 dark:text-white font-heading">{{ $bookings->where('status', '!=', 'cancelled')->count() }}</h4>
+                                <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Đã đặt sân</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm text-center transform transition-transform hover:-translate-y-1">
+                                <i class="fa-solid fa-ban text-3xl text-red-500 mb-3"></i>
+                                <h4 class="text-2xl font-bold text-slate-900 dark:text-white font-heading">{{ $bookings->where('status', 'cancelled')->count() }}</h4>
+                                <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Hủy sân</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm text-center transform transition-transform hover:-translate-y-1">
+                                <i class="fa-solid fa-star text-3xl text-warning mb-3"></i>
+                                <h4 class="text-2xl font-bold text-slate-900 dark:text-white font-heading">5</h4>
+                                <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Đánh giá</p>
+                            </div>
+                        </div>
+
+                        <!-- Bookings History -->
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white">Lịch Sử Đặt Sân</h3>
+                            </div>
+                            
+                            @if($bookings->isEmpty())
+                                <!-- Empty State Illustration -->
+                                <div class="text-center py-12">
+                                    <div class="w-32 h-32 mx-auto bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-4xl text-slate-300 dark:text-slate-600 mb-4 animate-bounce">
+                                        <i class="fa-regular fa-calendar-xmark"></i>
+                                    </div>
+                                    <h4 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Chưa có lượt đặt sân nào</h4>
+                                    <p class="text-sm text-slate-500 mb-6 max-w-sm mx-auto">Hãy bắt đầu trận đấu đầu tiên của bạn để tích lũy điểm thưởng nhé!</p>
+                                    <a href="{{ route('fields.index') }}" class="bg-primary text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-secondary transition-colors inline-block magnetic-btn"><span class="btn-text">Đặt Sân Ngay</span></a>
+                                </div>
+                            @else
+                                <!-- Custom Booking List -->
+                                <div class="space-y-4">
+                                    @foreach($bookings as $booking)
+                                        @foreach($booking->details as $detail)
+                                        <div class="flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
+                                            <div class="flex items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0">
+                                                <div class="w-14 h-14 rounded-xl overflow-hidden shadow-sm flex-shrink-0 relative bg-slate-100 flex items-center justify-center text-primary text-2xl">
+                                                    <i class="fa-solid fa-futbol"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{{ $detail->field->name ?? 'Sân' }}</h4>
+                                                    <p class="text-xs text-slate-500 flex items-center gap-2"><i class="fa-regular fa-clock"></i> {{ \Carbon\Carbon::parse($detail->timeSlot->start_time)->format('H:i') ?? '' }} - {{ \Carbon\Carbon::parse($detail->timeSlot->end_time)->format('H:i') ?? '' }} | {{ \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') }}</p>
+                                                    <p class="text-[10px] font-mono text-slate-400 mt-1">Mã đơn: {{ $booking->booking_code }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                                                <div class="text-right">
+                                                    <p class="font-bold text-slate-900 dark:text-white">{{ number_format($booking->total_amount) }}đ</p>
+                                                    
+                                                    @if($booking->status == 'completed')
+                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-600 uppercase tracking-wider">Hoàn thành</span>
+                                                    @elseif($booking->status == 'pending')
+                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-600 uppercase tracking-wider">Chờ xác nhận</span>
+                                                    @elseif($booking->status == 'confirmed')
+                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 uppercase tracking-wider">Đã xác nhận</span>
+                                                    @else
+                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase tracking-wider">Đã hủy</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Wallet History Tab -->
+                    <div x-show="tab === 'wallet'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="space-y-6">
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                                <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white">Biến Động Số Dư</h3>
+                            </div>
+                            
+                            @if(isset($walletTransactions) && $walletTransactions->isEmpty())
+                                <div class="text-center py-12">
+                                    <div class="w-32 h-32 mx-auto bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-4xl text-slate-300 dark:text-slate-600 mb-4">
+                                        <i class="fa-solid fa-wallet"></i>
+                                    </div>
+                                    <h4 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Chưa có giao dịch nào</h4>
+                                    <p class="text-sm text-slate-500">Các khoản hoàn tiền khi hủy sân sẽ được cộng trực tiếp vào ví này.</p>
+                                </div>
+                            @elseif(isset($walletTransactions))
+                                <div class="space-y-3">
+                                    @foreach($walletTransactions as $transaction)
+                                        <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-12 rounded-full flex items-center justify-center 
+                                                    {{ $transaction->type === 'refund' || $transaction->type === 'deposit' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600' }}">
+                                                    <i class="fa-solid {{ $transaction->type === 'refund' ? 'fa-arrow-rotate-left' : ($transaction->type === 'deposit' ? 'fa-arrow-down' : 'fa-arrow-up') }}"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-slate-900 dark:text-white">{{ $transaction->description ?? 'Giao dịch ví' }}</h4>
+                                                    <p class="text-xs text-slate-500"><i class="fa-regular fa-clock"></i> {{ $transaction->created_at->format('d/m/Y H:i') }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="font-bold {{ $transaction->type === 'refund' || $transaction->type === 'deposit' ? 'text-emerald-500' : 'text-red-500' }}">
+                                                    {{ $transaction->type === 'refund' || $transaction->type === 'deposit' ? '+' : '-' }}{{ number_format($transaction->amount) }}đ
+                                                </p>
+                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase">Thành công</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
+</div>
+
 @endsection
 
 @push('scripts')

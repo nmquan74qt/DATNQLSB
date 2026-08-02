@@ -153,11 +153,11 @@
                                     <button @click="selectSlot(slot)"
                                             :disabled="isBooked(slot.id)"
                                             :class="[
-                                                isBooked(slot.id) ? 'bg-slate-100 border-transparent cursor-not-allowed opacity-60' : 
+                                                isBooked(slot.id) ? 'bg-red-50 border-red-200 cursor-not-allowed opacity-80' : 
                                                 (selectedSlots.find(s => s.id === slot.id) ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-500/50 hover:text-emerald-500')
                                             ]"
                                             class="flex flex-col items-center justify-center py-3 rounded-xl border transition-all duration-300 focus:outline-none relative overflow-hidden group">
-                                        <span class="font-bold text-lg leading-none mb-1" x-text="formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time)"></span>
+                                        <span class="font-bold text-lg leading-none mb-1" :class="isBooked(slot.id) ? 'text-red-400 line-through' : ''" x-text="formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time)"></span>
                                         
                                         <!-- Price Modifier Badge if any -->
                                         <template x-if="slot.price_modifier > 0 && !isBooked(slot.id)">
@@ -166,7 +166,7 @@
 
                                         <!-- Booked Status -->
                                         <template x-if="isBooked(slot.id)">
-                                            <span class="text-xs font-bold mt-1 text-slate-400"><i class="fa-solid fa-lock text-[10px]"></i> Đã đặt</span>
+                                            <span class="text-xs font-bold mt-1 text-red-500 bg-red-100/60 px-2 py-0.5 rounded"><i class="fa-solid fa-lock text-[10px] mr-1"></i> Đã đặt</span>
                                         </template>
                                         <template x-if="!isBooked(slot.id)">
                                             <span class="text-xs font-medium mt-1 opacity-80" x-text="formatCurrency(basePrice + parseFloat(slot.price_modifier))"></span>
@@ -216,6 +216,7 @@
                             </div>
                             <div x-show="voucherMessage" class="text-sm mb-4 font-bold" :class="voucherSuccess ? 'text-emerald-500' : 'text-red-500'" x-html="voucherMessage"></div>
                             
+                            @auth
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <button @click="checkout('vnpay')" :disabled="isProcessing" class="flex-1 bg-primary hover:bg-secondary text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-primary/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0">
                                     <span x-show="!isProcessing" class="flex items-center"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png" class="h-5 w-auto object-contain inline-block mr-2 bg-white rounded-sm p-0.5" alt="VNPay"> Thanh toán VNPay</span>
@@ -226,6 +227,16 @@
                                     <span x-show="isProcessing"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...</span>
                                 </button>
                             </div>
+                            @endauth
+
+                            @guest
+                            <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl text-center">
+                                <p class="text-blue-700 font-medium mb-3">Bạn cần đăng nhập để tiến hành đặt sân</p>
+                                <a href="{{ route('login') }}" class="inline-block bg-primary hover:bg-secondary text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition-colors">
+                                    Đăng nhập ngay
+                                </a>
+                            </div>
+                            @endguest
                         </div>
 
                     </div>

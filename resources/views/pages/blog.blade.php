@@ -4,16 +4,17 @@
 
 @section('content')
     <!-- Header Parallax -->
-    <div class="relative pt-32 pb-20 overflow-hidden bg-slate-900 group">
+    <div class="relative pt-32 pb-20 overflow-hidden bg-white group border-b border-slate-100">
         <div class="absolute inset-0 z-0 parallax-bg">
-            <img src="https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=2070&q=80" class="w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-1000" alt="News Background" />
+            <img src="https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=2070&q=80" class="w-full h-full object-cover opacity-10 group-hover:scale-105 transition-transform duration-1000" alt="News Background" />
+            <div class="absolute inset-0 bg-gradient-to-b from-white/90 via-white/70 to-slate-50"></div>
         </div>
         
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="fade-up">
-            <h1 class="text-5xl md:text-6xl font-heading font-extrabold text-white mb-6 hero-title">
+            <h1 class="text-5xl md:text-6xl font-heading font-extrabold text-slate-900 mb-6 hero-title">
                 Tin Tức & <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Sự Kiện</span>
             </h1>
-            <p class="text-xl text-slate-300 max-w-2xl mx-auto">Cập nhật những thông tin mới nhất về giải đấu, chính sách và chương trình khuyến mãi.</p>
+            <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto font-medium">Cập nhật những thông tin mới nhất về giải đấu, chính sách và chương trình khuyến mãi.</p>
         </div>
     </div>
 

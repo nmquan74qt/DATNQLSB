@@ -1,38 +1,32 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Ký - PitchManage</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        .floating-input:focus ~ label,
-        .floating-input:not(:placeholder-shown) ~ label {
-            transform: translateY(-130%) scale(0.85);
-            color: #10b981; /* emerald-500 */
-        }
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover, 
-        input:-webkit-autofill:focus, 
-        input:-webkit-autofill:active{
-            -webkit-box-shadow: 0 0 0 30px white inset !important;
-            transition: background-color 5000s ease-in-out 0s;
-        }
-    </style>
-</head>
-<body class="font-sans antialiased bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center p-4 relative overflow-hidden" x-data>
+@extends('layouts.app')
 
+@section('title', 'Đăng Ký - PitchManage')
+
+@push('scripts')
+<style>
+    .floating-input:focus ~ label,
+    .floating-input:not(:placeholder-shown) ~ label {
+        transform: translateY(-130%) scale(0.85);
+        color: #10b981; /* emerald-500 */
+    }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    input:-webkit-autofill:active{
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+</style>
+@endpush
+
+@section('content')
+<div class="min-h-[85vh] flex items-center justify-center p-4 pt-32 pb-20 relative overflow-hidden bg-slate-50" x-data>
     <!-- Decorative Background -->
-    <div class="absolute top-0 w-full h-96 bg-gradient-to-b from-emerald-500/10 to-transparent -z-10"></div>
-    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-400/20 rounded-full blur-3xl -z-10"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/10 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute top-0 w-full h-96 bg-gradient-to-b from-emerald-500/10 to-transparent z-0"></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-400/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/10 rounded-full blur-3xl z-0 pointer-events-none"></div>
 
-    <div class="w-full max-w-5xl flex rounded-3xl overflow-hidden shadow-2xl bg-white animate-fade-up border border-slate-100">
+    <div class="relative z-10 w-full max-w-5xl flex rounded-3xl overflow-hidden shadow-2xl bg-white animate-fade-up border border-slate-100 mx-auto">
         
         <!-- Left Side: Image / Branding -->
         <div class="hidden lg:block lg:w-1/2 relative bg-emerald-900">
@@ -131,6 +125,5 @@
             </div>
         </div>
     </div>
-
-</body>
-</html>
+</div>
+@endsection

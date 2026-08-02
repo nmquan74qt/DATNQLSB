@@ -48,7 +48,7 @@
             <!-- Sidebar Header -->
             <div class="h-16 flex items-center justify-center border-b border-slate-200 dark:border-slate-700 px-4">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 overflow-hidden">
-                    <div class="w-10 h-10 bg-gradient-to-tr from-primary to-blue-500 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-lg shadow-primary/30">
+                    <div class="w-10 h-10 bg-gradient-to-tr from-primary to-emerald-400 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-lg shadow-primary/30">
                         <i class="fa-solid fa-futbol text-xl"></i>
                     </div>
                     <span class="font-heading font-bold text-xl tracking-tight text-slate-900 dark:text-white whitespace-nowrap transition-opacity duration-300"
@@ -97,7 +97,6 @@
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Khách Hàng</span>
                 </a>
 
-                @if(auth()->user()->role === 'admin')
                 <a href="{{ route('admin.payments.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.payments.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Hóa Đơn">
                     <i class="fa-solid fa-file-invoice-dollar w-6 text-center text-lg"></i>
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Hóa Đơn</span>
@@ -112,7 +111,6 @@
                     <i class="fa-solid fa-gear w-6 text-center text-lg"></i>
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Cài Đặt Hệ Thống</span>
                 </a>
-                @endif
             </nav>
         </aside>
 
@@ -155,7 +153,7 @@
                             </div>
                             <div class="max-h-80 overflow-y-auto">
                                 <a href="javascript:void(0);" class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex gap-3 transition-colors">
-                                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-500 flex items-center justify-center flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
                                         <i class="fa-solid fa-calendar-plus"></i>
                                     </div>
                                     <div>
@@ -182,7 +180,7 @@
                     <!-- User Profile -->
                     <div class="relative ml-2" x-data="{ userOpen: false }" @click.away="userOpen = false">
                         <button @click="userOpen = !userOpen" class="flex items-center gap-2 focus:outline-none">
-                            <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name ?? 'Admin').'&background=2563EB&color=fff' }}" alt="User" class="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name ?? 'Admin').'&background=10B981&color=fff' }}" alt="User" class="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm">
                         </button>
                         <div x-show="userOpen" x-transition x-cloak class="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 py-1 z-50">
                             <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700">

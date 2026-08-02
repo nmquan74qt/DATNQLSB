@@ -59,14 +59,14 @@
             </h3>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-colors group">
             <div class="flex justify-between items-start mb-4">
-                <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-500 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-users"></i>
                 </div>
             </div>
             <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Khách Hàng</p>
-            <h3 class="text-2xl font-black text-slate-800 dark:text-white font-heading">
+            <h3 class="text-2xl font-black text-slate-800 dark:text-white font-heading group-hover:text-primary transition-colors">
                 {{ number_format($totalCustomers) }}
             </h3>
         </div>
@@ -111,12 +111,12 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 @foreach($topCustomers as $index => $customer)
-                    <div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-700 text-center hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-700 text-center hover:shadow-md transition-shadow relative overflow-hidden group hover:border-primary/50">
                         @if($index == 0)
                             <div class="absolute top-0 right-0 bg-amber-400 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">TOP 1</div>
                         @endif
-                        <img src="{{ $customer->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($customer->name).'&background=random' }}" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-primary/20">
-                        <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate mb-1">{{ $customer->name }}</h4>
+                        <img src="{{ $customer->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($customer->name).'&background=10B981&color=fff' }}" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-primary/20 group-hover:border-primary transition-colors">
+                        <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate mb-1 group-hover:text-primary transition-colors">{{ $customer->name }}</h4>
                         <div class="flex justify-center gap-3 text-xs">
                             <span class="text-amber-500 font-bold"><i class="fa-solid fa-star"></i> {{ number_format($customer->points) }}</span>
                             <span class="text-slate-500"><i class="fa-solid fa-calendar-check"></i> {{ $customer->bookings_count }}</span>
@@ -136,8 +136,8 @@
         
         // Gradient for line chart
         let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); // primary blue
-        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.5)'); // primary emerald
+        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
         new Chart(ctx, {
             type: 'line',
@@ -146,11 +146,11 @@
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
                     data: {!! json_encode($revenueData) !!},
-                    borderColor: '#3b82f6',
+                    borderColor: '#10b981',
                     backgroundColor: gradient,
                     borderWidth: 3,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#3b82f6',
+                    pointBorderColor: '#10b981',
                     pointBorderWidth: 2,
                     pointRadius: 4,
                     pointHoverRadius: 6,

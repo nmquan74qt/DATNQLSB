@@ -59,4 +59,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class, 'author_id');
     }
+
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class)->orderBy('created_at', 'desc');
+    }
 }
