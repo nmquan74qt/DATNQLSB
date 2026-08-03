@@ -17,4 +17,14 @@ class Field extends Model
     {
         return $this->hasMany(BookingDetail::class);
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(Field::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Field::class, 'parent_id');
+    }
 }

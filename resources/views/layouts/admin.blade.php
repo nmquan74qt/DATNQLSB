@@ -70,9 +70,15 @@
                     <div class="h-px bg-slate-200 dark:bg-slate-700 mt-2" :class="{ 'block': !sidebarOpen, 'hidden': sidebarOpen }"></div>
                 </div>
 
+                @if(auth()->user()->role === 'admin')
                 <a href="{{ route('admin.fields.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.fields.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Sân Bóng">
                     <i class="fa-solid fa-layer-group w-6 text-center text-lg"></i>
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Sân Bóng</span>
+                </a>
+
+                <a href="{{ route('admin.time-slots.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.time-slots.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Bảng Giá & Khung Giờ">
+                    <i class="fa-solid fa-clock w-6 text-center text-lg"></i>
+                    <span class="font-medium whitespace-nowrap flex-grow truncate" :class="{ 'hidden': !sidebarOpen }">Bảng Giá & Khung Giờ</span>
                 </a>
 
 
@@ -86,6 +92,7 @@
                     <i class="fa-solid fa-newspaper w-6 text-center text-lg"></i>
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Tin Tức / Blog</span>
                 </a>
+                @endif
 
                 <a href="{{ route('admin.bookings.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->requestUri == '/admin/bookings' || request()->routeIs('admin.bookings.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Lịch Đặt Sân">
                     <i class="fa-solid fa-calendar-check w-6 text-center text-lg"></i>
@@ -101,16 +108,33 @@
                     <i class="fa-solid fa-file-invoice-dollar w-6 text-center text-lg"></i>
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Hóa Đơn</span>
                 </a>
+
+                @if(auth()->user()->role === 'admin')
+                <div class="pt-4 pb-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3" :class="{ 'hidden': !sidebarOpen }">Thống Kê</p>
+                    <div class="h-px bg-slate-200 dark:bg-slate-700 mt-2" :class="{ 'block': !sidebarOpen, 'hidden': sidebarOpen }"></div>
+                </div>
+
+                <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.reports.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Báo cáo Doanh thu & Tỷ lệ lấp đầy">
+                    <i class="fa-solid fa-chart-line w-6 text-center text-lg"></i>
+                    <span class="font-medium whitespace-nowrap flex-grow truncate" :class="{ 'hidden': !sidebarOpen }">Doanh Thu & Lấp Đầy</span>
+                </a>
                 
                 <div class="pt-4 pb-2">
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3" :class="{ 'hidden': !sidebarOpen }">Hệ Thống</p>
                     <div class="h-px bg-slate-200 dark:bg-slate-700 mt-2" :class="{ 'block': !sidebarOpen, 'hidden': sidebarOpen }"></div>
                 </div>
 
+                <a href="{{ route('admin.staff.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.staff.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Nhân Viên & Phân Quyền">
+                    <i class="fa-solid fa-user-tie w-6 text-center text-lg"></i>
+                    <span class="font-medium whitespace-nowrap flex-grow truncate" :class="{ 'hidden': !sidebarOpen }">Nhân Viên & Phân Quyền</span>
+                </a>
+
                 <a href="{{ route('admin.system.settings') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.system.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Cài Đặt Hệ Thống">
                     <i class="fa-solid fa-gear w-6 text-center text-lg"></i>
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Cài Đặt Hệ Thống</span>
                 </a>
+                @endif
             </nav>
         </aside>
 

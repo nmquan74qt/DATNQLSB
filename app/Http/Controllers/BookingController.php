@@ -8,6 +8,7 @@ use App\Models\BookingDetail;
 use App\Models\TimeSlot;
 use App\Models\Payment;
 use Illuminate\Support\Str;
+use App\Notifications\SystemNotification;
 
 class BookingController extends Controller
 {
@@ -22,107 +23,167 @@ class BookingController extends Controller
             'total_amount' => 'required|numeric'
         ]);
 
-        $timeSlots = [];
-        // First loop: Check availability for ALL slots before saving anything
-        foreach ($request->slots as $slotData) {
-            $timeSlot = TimeSlot::firstOrCreate([
-                'start_time' => $slotData['start_time'] . (strlen($slotData['start_time']) == 5 ? ':00' : ''),
-                'end_time' => $slotData['end_time'] . (strlen($slotData['end_time']) == 5 ? ':00' : '')
-            ], [
-                'price_modifier' => 0,
-                'is_active' => true
-            ]);
-
-            $exists = BookingDetail::whereHas('booking', function($q) use ($request) {
-                $q->where('booking_date', $request->booking_date)
-                  ->whereIn('status', ['pending', 'confirmed']);
-            })
-            ->where('field_id', $request->field_id)
-            ->where('time_slot_id', $timeSlot->id)
-            ->exists();
-
-            if ($exists) {
-                return response()->json(['success' => false, 'message' => 'Một hoặc nhiều khung giờ bạn chọn đã có người đặt. Vui lòng tải lại trang.']);
-            }
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            // Khóa (lock) record của sân này để chống trùng lịch (Race Condition)
+            $field = \App\Models\Field::where('id', $request->field_id)->lockForUpdate()->first();
             
-            $timeSlots[] = $timeSlot;
-        }
-
-        $notes = 'Đang chờ thanh toán qua ' . $request->payment_method;
-        if ($request->voucher_code) {
-            $voucher = \App\Models\Voucher::where('code', strtoupper($request->voucher_code))
-                ->where('is_active', true)
-                ->where('used_count', '<', \Illuminate\Support\Facades\DB::raw('max_uses'))
-                ->where(function($q) {
-                    $q->whereNull('valid_from')->orWhere('valid_from', '<=', now());
-                })
-                ->where(function($q) {
-                    $q->whereNull('valid_to')->orWhere('valid_to', '>=', now());
-                })
-                ->first();
-
-            if (!$voucher) {
-                return response()->json(['success' => false, 'message' => 'Mã Voucher không hợp lệ, đã hết hạn hoặc hết lượt sử dụng.']);
+            if (!$field) {
+                return response()->json(['success' => false, 'message' => 'Sân không tồn tại.']);
             }
 
-            // Kiểm tra user đã sử dụng chưa
-            $userId = auth()->id() ?? 1;
-            $hasUsed = Booking::where('user_id', $userId)
-                ->where('notes', 'like', '%Có áp dụng mã ' . $voucher->code . '%')
-                ->whereIn('status', ['pending', 'confirmed', 'completed'])
+            $timeSlots = [];
+            $realTotalAmount = 0; // Tình huống 2: Tính tổng tiền backend
+            
+            // First loop: Check availability for ALL slots before saving anything
+            foreach ($request->slots as $slotData) {
+                $startStr = $slotData['start_time'] . (strlen($slotData['start_time']) == 5 ? ':00' : '');
+                $endStr = $slotData['end_time'] . (strlen($slotData['end_time']) == 5 ? ':00' : '');
+                
+                $timeSlot = TimeSlot::firstOrCreate([
+                    'start_time' => $startStr,
+                    'end_time' => $endStr
+                ], [
+                    'price_modifier' => 0,
+                    'is_active' => true
+                ]);
+
+                // Xử lý logic DATETIME và đá xuyên đêm
+                $startDatetime = \Carbon\Carbon::parse($request->booking_date . ' ' . $startStr);
+                $endDatetime = \Carbon\Carbon::parse($request->booking_date . ' ' . $endStr);
+
+                if ($endDatetime->lt($startDatetime)) {
+                    $endDatetime->addDay(); // Qua ngày hôm sau
+                }
+
+                // Tình huống 4: Logic Gộp/Chia Sân (Sân Cha - Sân Con)
+                $fieldIdsToCheck = [$request->field_id];
+                if ($field->parent_id) {
+                    $fieldIdsToCheck[] = $field->parent_id; // Check sân cha
+                }
+                foreach ($field->children as $child) {
+                    $fieldIdsToCheck[] = $child->id; // Check các sân con
+                }
+
+                $exists = BookingDetail::whereHas('booking', function($q) {
+                    $q->whereIn('status', ['pending', 'confirmed', 'completed']);
+                })
+                ->whereIn('field_id', $fieldIdsToCheck) // Check tất cả sân liên quan
+                ->where(function($q) use ($startDatetime, $endDatetime) {
+                    // Logic check trùng lịch tuyệt đối theo DATETIME
+                    $q->where('start_time', '<', $endDatetime)
+                      ->where('end_time', '>', $startDatetime);
+                })
                 ->exists();
 
-            if ($hasUsed) {
-                return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã Voucher này rồi.']);
+                if ($exists) {
+                    // Cố tình vứt ra Exception để rollback transaction nếu trùng
+                    return response()->json(['success' => false, 'message' => 'Một hoặc nhiều khung giờ bạn chọn đã có người đặt. Vui lòng tải lại trang.']);
+                }
+                
+                // Tính tiền cho khoảng thời gian này
+                $slotPrice = $this->calculatePrice($field, $startDatetime, $endDatetime);
+                $realTotalAmount += $slotPrice;
+                
+                // Store datetimes temporarily for saving later
+                $timeSlot->actual_start_datetime = $startDatetime;
+                $timeSlot->actual_end_datetime = $endDatetime;
+                $timeSlot->calculated_price = $slotPrice; // Lưu tạm để insert vào BookingDetail
+                $timeSlots[] = $timeSlot;
             }
 
-            $voucher->increment('used_count');
-            $notes .= ' (Có áp dụng mã ' . $voucher->code . ')';
-        }
+            $notes = 'Đang chờ thanh toán qua ' . $request->payment_method;
+            if ($request->voucher_code) {
+                $voucher = \App\Models\Voucher::where('code', strtoupper($request->voucher_code))
+                    ->where('is_active', true)
+                    ->where('used_count', '<', \Illuminate\Support\Facades\DB::raw('max_uses'))
+                    ->where(function($q) {
+                        $q->whereNull('valid_from')->orWhere('valid_from', '<=', now());
+                    })
+                    ->where(function($q) {
+                        $q->whereNull('valid_to')->orWhere('valid_to', '>=', now());
+                    })
+                    ->first();
 
-        $bookingCode = $request->booking_code ?? ('BK' . strtoupper(Str::random(6)));
-        
-        $booking = Booking::create([
-            'user_id' => auth()->id() ?? 1, // fallback if not logged in
-            'booking_code' => $bookingCode,
-            'booking_date' => $request->booking_date,
-            'total_amount' => $request->total_amount,
-            'status' => 'pending', 
-            'notes' => $notes
-        ]);
+                if (!$voucher) {
+                    return response()->json(['success' => false, 'message' => 'Mã Voucher không hợp lệ, đã hết hạn hoặc hết lượt sử dụng.']);
+                }
 
-        // Second loop: Create booking details
-        $perSlotPrice = $request->total_amount / count($timeSlots); // Rough average distribution for details
-        foreach ($timeSlots as $ts) {
-            $booking->details()->create([
-                'field_id' => $request->field_id,
-                'time_slot_id' => $ts->id,
-                'price' => $perSlotPrice
-            ]);
-        }
+                // Kiểm tra user đã sử dụng chưa
+                $userId = auth()->id() ?? 1;
+                $hasUsed = Booking::where('user_id', $userId)
+                    ->where('notes', 'like', '%Có áp dụng mã ' . $voucher->code . '%')
+                    ->whereIn('status', ['pending', 'confirmed', 'completed'])
+                    ->exists();
 
-        if ($request->payment_method === 'vnpay') {
-            $vnpayService = new \App\Services\Payment\VNPayService();
-            $redirectUrl = $vnpayService->createPaymentUrl(
-                $booking->booking_code, 
-                $booking->total_amount, 
-                "Thanh toan dat san " . $booking->booking_code
-            );
+                if ($hasUsed) {
+                    return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã Voucher này rồi.']);
+                }
+
+                $voucher->increment('used_count');
+                $notes .= ' (Có áp dụng mã ' . $voucher->code . ')';
+                
+                // Trừ tiền Voucher
+                if ($voucher->discount_percent) {
+                    $realTotalAmount -= $realTotalAmount * ($voucher->discount_percent / 100);
+                }
+                if ($voucher->discount_amount) {
+                    $realTotalAmount -= $voucher->discount_amount;
+                }
+                if ($realTotalAmount < 0) $realTotalAmount = 0;
+            }
+
+            $bookingCode = $request->booking_code ?? ('BK' . strtoupper(Str::random(6)));
             
+            $booking = Booking::create([
+                'user_id' => auth()->id() ?? 1, // fallback if not logged in
+                'booking_code' => $bookingCode,
+                'booking_date' => $request->booking_date,
+                'total_amount' => $realTotalAmount, // Tình huống 2: backend tính
+                'status' => 'pending', 
+                'notes' => $notes
+            ]);
+
+            // Second loop: Create booking details
+            foreach ($timeSlots as $ts) {
+                $booking->details()->create([
+                    'field_id' => $request->field_id,
+                    'time_slot_id' => $ts->id,
+                    'price' => $ts->calculated_price, // Tình huống 2: đúng giá block
+                    'start_time' => $ts->actual_start_datetime,
+                    'end_time' => $ts->actual_end_datetime,
+                ]);
+            }
+
+            if ($request->payment_method === 'vnpay') {
+                $vnpayService = new \App\Services\Payment\VNPayService();
+                $redirectUrl = $vnpayService->createPaymentUrl(
+                    $booking->booking_code, 
+                    $booking->total_amount, 
+                    "Thanh toan dat san " . $booking->booking_code
+                );
+                
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Đang chuyển hướng đến VNPay...',
+                    'booking_code' => $booking->booking_code,
+                    'redirect_url' => $redirectUrl
+                ]);
+            }
+
+            if (auth()->check()) {
+                auth()->user()->notify(new SystemNotification(
+                    '⚽ Đặt sân thành công',
+                    "Đơn đặt sân {$booking->booking_code} đã được tạo thành công! Vui lòng chờ xác nhận.",
+                    'success'
+                ));
+            }
+
             return response()->json([
                 'success' => true, 
-                'message' => 'Đang chuyển hướng đến VNPay...',
-                'booking_code' => $booking->booking_code,
-                'redirect_url' => $redirectUrl
+                'message' => 'Đặt sân thành công!',
+                'booking_code' => $booking->booking_code
             ]);
-        }
-
-
-        return response()->json([
-            'success' => true, 
-            'message' => 'Đặt sân thành công!',
-            'booking_code' => $booking->booking_code
-        ]);
+        });
     }
 
     public function checkVoucher(Request $request)
@@ -194,13 +255,54 @@ class BookingController extends Controller
             // Create payment record
             Payment::create([
                 'booking_id' => $booking->id,
+                'user_id' => $booking->user_id,
                 'amount' => $booking->total_amount,
                 'payment_method' => str_contains(strtolower($booking->notes), 'momo') ? 'momo' : 'vnpay',
-                'payment_status' => 'completed',
-                'transaction_id' => 'SIMULATED_' . time()
+                'status' => 'success',
+                'transaction_id' => 'SIMULATED_' . time(),
+                'paid_at' => now(),
             ]);
         }
 
         return response()->json(['success' => true, 'message' => 'Simulated webhook processed']);
+    }
+
+    /**
+     * Tình huống bảo vệ 2: Tính tiền chia theo block giờ (Giờ thường/Giờ vàng)
+     */
+    private function calculatePrice($field, $startDatetime, $endDatetime)
+    {
+        $calculatedTotal = 0;
+        $current = clone $startDatetime;
+        $basePricePerHour = $field->base_price;
+
+        while ($current < $endDatetime) {
+            // Find the next hour boundary
+            $next = clone $current;
+            $next->startOfHour()->addHour();
+            
+            if ($next > $endDatetime) {
+                $next = clone $endDatetime;
+            }
+            
+            $minutes = $current->diffInMinutes($next);
+            $hourFraction = $minutes / 60.0;
+            
+            $timeString = $current->format('H:i:s');
+            
+            // Lấy modifier của khung giờ này (Giờ vàng)
+            $slot = \App\Models\TimeSlot::where('start_time', '<=', $timeString)
+                            ->where('end_time', '>', $timeString)
+                            ->first();
+                            
+            $modifier = $slot ? $slot->price_modifier : 0;
+            $hourlyRate = $basePricePerHour + $modifier;
+            
+            $calculatedTotal += $hourlyRate * $hourFraction;
+            
+            $current = clone $next;
+        }
+
+        return $calculatedTotal;
     }
 }

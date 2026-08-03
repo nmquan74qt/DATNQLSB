@@ -47,7 +47,11 @@
                                             <div class="absolute inset-0 bg-white/30 w-full h-full animate-[shimmer_2s_infinite]"></div>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-slate-500 text-center">Cần <span class="font-bold text-slate-700 dark:text-slate-300">{{ number_format($nextLevel->required_points - $user->points) }} điểm</span> nữa để lên <strong style="color: {{ $nextLevel->color_hex }}">{{ $nextLevel->name }}</strong></p>
+                                    @if($nextLevel->required_points - $user->points <= 0)
+                                        <p class="text-xs text-emerald-600 font-bold text-center">Bạn đã đủ điều kiện để lên hạng <strong style="color: {{ $nextLevel->color_hex }}">{{ $nextLevel->name }}</strong>!</p>
+                                    @else
+                                        <p class="text-xs text-slate-500 text-center">Cần <span class="font-bold text-slate-700 dark:text-slate-300">{{ number_format($nextLevel->required_points - $user->points) }} điểm</span> nữa để lên <strong style="color: {{ $nextLevel->color_hex }}">{{ $nextLevel->name }}</strong></p>
+                                    @endif
                                 @else
                                     <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
                                         <div class="h-3 rounded-full relative overflow-hidden transition-all duration-1000" style="width: 100%; background-color: {{ $level->color_hex ?? '#cd7f32' }}">
@@ -168,7 +172,25 @@
                                 </div>
                             </div>
                             
-                            <div class="pt-4 border-t border-slate-100 flex justify-end">
+                            <!-- Đổi Mật Khẩu Section -->
+                            <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white mt-12 mb-6 border-b pb-4">Đổi Mật Khẩu <span class="text-sm font-normal text-slate-500">(Bỏ trống nếu không muốn đổi)</span></h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Mật khẩu hiện tại</label>
+                                    <input type="password" name="current_password" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Mật khẩu mới</label>
+                                    <input type="password" name="password" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Xác nhận mật khẩu mới</label>
+                                    <input type="password" name="password_confirmation" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-primary/50 transition-all">
+                                </div>
+                            </div>
+                            
+                            <div class="pt-8 mt-8 border-t border-slate-100 flex justify-end">
                                 <button type="submit" class="bg-primary hover:bg-secondary text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/30 transform hover:-translate-y-1 transition-all">
                                     Lưu Thay Đổi
                                 </button>
@@ -240,10 +262,45 @@
                                                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-600 uppercase tracking-wider">Chờ xác nhận</span>
                                                     @elseif($booking->status == 'confirmed')
                                                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 uppercase tracking-wider">Đã xác nhận</span>
+                                                    @elseif($booking->status == 'in_progress')
+                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-600 uppercase tracking-wider">Đang đá</span>
                                                     @else
                                                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase tracking-wider">Đã hủy</span>
                                                     @endif
                                                 </div>
+                                                
+                                                @php
+                                                    $canCancel = false;
+                                                    $hoursDiff = 0;
+                                                    if (in_array($booking->status, ['pending', 'confirmed'])) {
+                                                        $startTime = $detail->start_time;
+                                                        if (!$startTime) {
+                                                            $timeSlot = \App\Models\TimeSlot::find($detail->time_slot_id);
+                                                            if ($timeSlot) $startTime = \Carbon\Carbon::parse($booking->booking_date . ' ' . $timeSlot->start_time);
+                                                        } else {
+                                                            $startTime = \Carbon\Carbon::parse($startTime);
+                                                        }
+                                                        
+                                                        if ($startTime && $startTime->isFuture()) {
+                                                            $canCancel = true;
+                                                            $hoursDiff = now()->diffInMinutes($startTime, false) / 60.0;
+                                                        }
+                                                    }
+                                                    
+                                                    // Determine cancellation type
+                                                    $cancelType = '';
+                                                    if ($booking->status === 'pending') {
+                                                        $cancelType = 'no_deposit';
+                                                    } elseif ($booking->status === 'confirmed') {
+                                                        $cancelType = $hoursDiff > 4 ? 'refund' : 'no_refund';
+                                                    }
+                                                @endphp
+                                                
+                                                @if($canCancel)
+                                                    <button @click="$dispatch('open-cancel-modal', { action: '{{ route('customer.bookings.cancel', $booking->id) }}', type: '{{ $cancelType }}', amount: {{ \App\Models\Payment::where('booking_id', $booking->id)->where('status', 'success')->sum('amount') }} })" class="ml-4 w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors shadow-sm" title="Hủy Sân">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
                                         @endforeach
@@ -300,10 +357,65 @@
     </div>
 </div>
 
+<!-- Cancel Booking Modal -->
+<div x-data="{ show: false, action: '', type: '', cancelAmount: 0 }" 
+    @open-cancel-modal.window="show = true; action = $event.detail.action; type = $event.detail.type; cancelAmount = $event.detail.amount"
+    x-show="show" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overflow-x-hidden bg-slate-900/50 backdrop-blur-sm"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0">
+    <div class="relative w-full max-w-md p-4" @click.away="show = false">
+        <div class="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden transform transition-all"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-8 scale-95">
+            
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-3xl mx-auto mb-4">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="text-xl font-bold font-heading text-slate-900 dark:text-white mb-2">Xác Nhận Hủy Sân</h3>
+                
+                <div class="text-sm text-slate-500 mb-6 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700 text-left space-y-2">
+                    <div x-show="type === 'no_deposit'">
+                        <p><i class="fa-solid fa-info-circle text-primary mr-2"></i> Đơn của bạn đang chờ duyệt và chưa thanh toán cọc. Bạn có thể hủy miễn phí.</p>
+                    </div>
+                    <div x-show="type === 'refund'">
+                        <p class="mb-2"><i class="fa-solid fa-check-circle text-emerald-500 mr-2"></i> Bạn đang hủy sân <strong>trước 4 tiếng</strong> so với giờ đá.</p>
+                        <p><i class="fa-solid fa-wallet text-emerald-500 mr-2"></i> Số tiền <strong class="text-emerald-600" x-text="new Intl.NumberFormat('vi-VN').format(cancelAmount) + 'đ'"></strong> sẽ được hoàn tự động vào <strong>Ví Cá Nhân</strong> của bạn.</p>
+                    </div>
+                    <div x-show="type === 'no_refund'">
+                        <p class="mb-2"><i class="fa-solid fa-xmark-circle text-red-500 mr-2"></i> Bạn đang hủy sân <strong>dưới 4 tiếng</strong> so với giờ đá.</p>
+                        <p class="text-red-500 font-bold"><i class="fa-solid fa-ban mr-2"></i> Theo quy định, bạn sẽ không được hoàn cọc cho đơn này.</p>
+                    </div>
+                </div>
+
+                <form :action="action" method="POST" class="flex gap-3 w-full">
+                    @csrf
+                    @method('PUT')
+                    <button type="button" @click="show = false" class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                        Đóng
+                    </button>
+                    <button type="submit" class="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-1">
+                        Đồng Ý Hủy
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <style>
+[x-cloak] { display: none !important; }
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }

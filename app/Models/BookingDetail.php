@@ -8,6 +8,13 @@ class BookingDetail extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+        'actual_start_time' => 'datetime',
+        'actual_end_time' => 'datetime',
+    ];
+
     public function booking()
     {
         return $this->belongsTo(Booking::class);

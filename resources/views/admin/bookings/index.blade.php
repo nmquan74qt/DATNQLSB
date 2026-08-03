@@ -14,7 +14,7 @@
 @endsection
 
 @section('content')
-    <div x-data="{ activeTab: 'calendar' }">
+    <div x-data="bookingManager()">
         <!-- Tabs -->
         <div class="flex space-x-1 bg-white dark:bg-slate-800 p-1 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 mb-6 inline-flex">
             <button @click="activeTab = 'calendar'" :class="{ 'bg-slate-100 dark:bg-slate-700 text-primary font-bold shadow-sm': activeTab === 'calendar', 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200': activeTab !== 'calendar' }" class="px-5 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
@@ -68,6 +68,8 @@
                                             <span class="bg-amber-100 text-amber-600 px-3 py-1 rounded-full text-xs font-bold">Chờ duyệt</span>
                                         @elseif($booking->status == 'confirmed')
                                             <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">Đã xác nhận</span>
+                                        @elseif($booking->status == 'in_progress')
+                                            <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">Đang đá</span>
                                         @elseif($booking->status == 'completed')
                                             <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold">Hoàn thành</span>
                                         @else
@@ -75,9 +77,24 @@
                                         @endif
                                     </td>
                                     <td class="py-4 px-4 text-right">
-                                        <button class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-primary hover:text-white text-slate-500 transition-colors flex items-center justify-center">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </button>
+                                        <div class="flex items-center justify-end gap-2">
+                                            @if($booking->status == 'pending')
+                                                <button @click="submitStatus('confirmed', {{ $booking->id }})" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition-colors flex items-center justify-center" title="Duyệt (Khóa sân)">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </button>
+                                            @elseif($booking->status == 'confirmed')
+                                                <button @click="if(confirm('Khách đã đến? Bắt đầu Check-in?')) submitStatus('in_progress', {{ $booking->id }})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center" title="Bắt đầu đá (Check-in)">
+                                                    <i class="fa-solid fa-play"></i>
+                                                </button>
+                                            @elseif($booking->status == 'in_progress')
+                                                <button @click="if(confirm('Khách đã trả sân? Check-out hoàn tất?')) submitStatus('completed', {{ $booking->id }})" class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-colors flex items-center justify-center" title="Kết thúc (Check-out)">
+                                                    <i class="fa-solid fa-check-to-slot"></i>
+                                                </button>
+                                            @endif
+                                            <button @click="openDetails({{ $booking->id }})" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-primary hover:text-white text-slate-500 transition-colors flex items-center justify-center" title="Chi tiết">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -99,7 +116,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Modal Tạo Đặt Sân -->
     <div x-data="{ isModalOpen: false }" @open-booking-modal.window="isModalOpen = true">
@@ -165,9 +181,156 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Chi Tiết Đặt Sân -->
+    <div x-show="isDetailsModalOpen" class="fixed inset-0 z-[105] flex items-center justify-center overflow-y-auto overflow-x-hidden bg-slate-900/50 backdrop-blur-sm" x-cloak x-transition.opacity>
+        <div class="relative w-full max-w-4xl p-4 md:p-6 mx-auto transition-all transform" x-show="isDetailsModalOpen" x-transition.scale.origin.bottom @click.away="isDetailsModalOpen = false">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col max-h-[90vh]">
+                <div class="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700 shrink-0">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">Chi Tiết Lịch Đặt Sân <span x-text="selectedBooking?.booking_code" class="text-primary ml-2"></span></h3>
+                        <p class="text-sm text-slate-500 mt-1">Ngày đặt: <span x-text="selectedBooking ? new Date(selectedBooking.booking_date).toLocaleDateString('vi-VN') : ''"></span></p>
+                    </div>
+                    <button @click="isDetailsModalOpen = false" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center">
+                        <i class="fa-solid fa-times text-lg"></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto grow">
+                    <template x-if="selectedBooking">
+                        <div>
+                            <!-- Thông tin khách hàng -->
+                            <div class="mb-6 bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-100 dark:border-slate-600">
+                                <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-user text-primary mr-2"></i>Thông tin Khách Hàng</h4>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div><span class="text-slate-500">Tên:</span> <strong class="text-slate-800 dark:text-slate-200" x-text="selectedBooking.user ? selectedBooking.user.name : 'Khách lẻ'"></strong></div>
+                                    <div><span class="text-slate-500">SĐT:</span> <strong class="text-slate-800 dark:text-slate-200" x-text="selectedBooking.user ? selectedBooking.user.phone : 'N/A'"></strong></div>
+                                    <div><span class="text-slate-500">Tổng tiền:</span> <strong class="text-primary text-base" x-text="new Intl.NumberFormat('vi-VN').format(selectedBooking.total_amount) + 'đ'"></strong></div>
+                                    <div><span class="text-slate-500">Trạng thái:</span> 
+                                        <span x-show="selectedBooking.status === 'pending'" class="bg-amber-100 text-amber-600 px-2 py-0.5 rounded text-xs font-bold">Chờ duyệt</span>
+                                        <span x-show="selectedBooking.status === 'confirmed'" class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs font-bold">Đã xác nhận</span>
+                                        <span x-show="selectedBooking.status === 'in_progress'" class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-xs font-bold">Đang đá</span>
+                                        <span x-show="selectedBooking.status === 'completed'" class="bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded text-xs font-bold">Hoàn thành</span>
+                                        <span x-show="selectedBooking.status === 'cancelled'" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-bold">Đã hủy</span>
+                                    </div>
+                                    <div class="col-span-2"><span class="text-slate-500">Ghi chú:</span> <span class="text-slate-800 dark:text-slate-200 italic" x-text="selectedBooking.notes || 'Không có ghi chú'"></span></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Chi tiết sân -->
+                            <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-futbol text-primary mr-2"></i>Chi Tiết Thuê Sân</h4>
+                            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                        <tr>
+                                            <th class="px-4 py-3 font-semibold">Tên Sân</th>
+                                            <th class="px-4 py-3 font-semibold">Khung Giờ</th>
+                                            <th class="px-4 py-3 font-semibold text-right">Giá</th>
+                                            <th class="px-4 py-3 font-semibold text-right">Phụ thu (Quá giờ)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                                        <template x-for="detail in selectedBooking.details" :key="detail.id">
+                                            <tr>
+                                                <td class="px-4 py-3 text-slate-800 dark:text-slate-200 font-medium" x-text="detail.field ? detail.field.name : 'N/A'"></td>
+                                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">
+                                                    <span x-text="detail.time_slot ? detail.time_slot.start_time.substring(0,5) + ' - ' + detail.time_slot.end_time.substring(0,5) : ''"></span>
+                                                    <div x-show="detail.actual_start_time" class="text-xs text-blue-500 mt-1">
+                                                        Vào sân: <span x-text="new Date(detail.actual_start_time).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})"></span>
+                                                    </div>
+                                                    <div x-show="detail.actual_end_time" class="text-xs text-red-500 mt-1">
+                                                        Ra sân: <span x-text="new Date(detail.actual_end_time).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})"></span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 text-right font-medium text-slate-800 dark:text-slate-200" x-text="new Intl.NumberFormat('vi-VN').format(detail.price) + 'đ'"></td>
+                                                <td class="px-4 py-3 text-right text-red-500 font-medium" x-text="detail.overtime_fee > 0 ? '+' + new Intl.NumberFormat('vi-VN').format(detail.overtime_fee) + 'đ' : '-'"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Actions Form -->
+                            <form :action="'/admin/bookings/' + selectedBooking.id + '/status'" method="POST" id="statusForm">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status" id="status_input" value="">
+                                
+                                <!-- Hành động: Chờ duyệt -> Duyệt / Hủy -->
+                                <div x-show="selectedBooking.status === 'pending'" class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
+                                    <button type="button" @click="submitStatus('cancelled')" class="px-5 py-2.5 rounded-xl font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors">Hủy Đơn</button>
+                                    <button type="button" @click="submitStatus('confirmed')" class="px-5 py-2.5 rounded-xl font-medium text-white bg-primary hover:bg-blue-600 shadow-sm shadow-primary/30 transition-colors">Duyệt Đơn</button>
+                                </div>
+                                
+                                <!-- Hành động: Đã xác nhận -> Check-in -->
+                                <div x-show="selectedBooking.status === 'confirmed'" class="bg-red-50/50 dark:bg-slate-700/30 p-4 rounded-xl border border-red-100 dark:border-slate-600 mt-6 text-center">
+                                    <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2"><i class="fa-solid fa-play text-red-500 mr-2"></i>Khách đến sân</h4>
+                                    <p class="text-sm text-slate-500 mb-4">Bấm nút Check-in để bắt đầu tính giờ sử dụng sân thực tế.</p>
+                                    <div class="flex justify-center gap-3">
+                                        <button type="button" @click="submitStatus('in_progress')" class="px-8 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 shadow-sm shadow-red-500/30 transition-colors">
+                                            Bắt đầu Check-in
+                                        </button>
+                                    </div>
+                                    <div class="mt-4">
+                                        <button type="button" @click="if(confirm('Bạn có chắc chắn muốn hủy đơn này? Hệ thống sẽ hoàn tiền cọc nếu có.')) submitStatus('cancelled')" class="text-sm font-medium text-red-500 hover:text-red-700 transition-colors underline">Hủy Đơn Này</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hành động: Đang đá -> Check-out -->
+                                <div x-show="selectedBooking.status === 'in_progress'" class="bg-blue-50/50 dark:bg-slate-700/30 p-4 rounded-xl border border-blue-100 dark:border-slate-600 mt-6">
+                                    <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-clock-rotate-left text-blue-500 mr-2"></i>Thủ tục Check-out</h4>
+                                    <div class="flex flex-col sm:flex-row gap-4 items-end">
+                                        <div class="grow w-full">
+                                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Giờ kết thúc thực tế (Để trống nếu đúng giờ)</label>
+                                            <input type="datetime-local" name="actual_end_time" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
+                                            <p class="text-xs text-slate-500 mt-1">Phụ thu: <10p: Miễn phí | 10-30p: 50% giá sân/giờ | >30p: 100% giá sân/giờ.</p>
+                                        </div>
+                                        <button type="button" @click="submitStatus('completed')" class="shrink-0 px-6 py-2.5 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-sm shadow-emerald-500/30 transition-colors h-11 flex items-center gap-2">
+                                            <i class="fa-solid fa-check-to-slot"></i> Check-out
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Completed / Cancelled: No actions -->
+                                <div x-show="['completed', 'cancelled'].includes(selectedBooking.status)" class="text-center py-4 mt-4 border-t border-slate-100 dark:border-slate-700">
+                                    <p class="text-slate-500 text-sm">Đơn đặt sân này đã kết thúc và không thể thay đổi trạng thái.</p>
+                                </div>
+                            </form>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
+<script>
+    window.bookingsData = {!! $bookings->getCollection()->toJson() !!};
+    
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('bookingManager', () => ({
+            activeTab: 'calendar',
+            isDetailsModalOpen: false,
+            selectedBooking: null,
+            bookings: window.bookingsData,
+            
+            openDetails(id) {
+                this.selectedBooking = this.bookings.find(b => b.id === id);
+                this.isDetailsModalOpen = true;
+            },
+            
+            submitStatus(status, id = null) {
+                if (id) {
+                    this.selectedBooking = this.bookings.find(b => b.id === id);
+                    document.getElementById('statusForm').action = '/admin/bookings/' + id + '/status';
+                }
+                document.getElementById('status_input').value = status;
+                document.getElementById('statusForm').submit();
+            }
+        }));
+    });
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('booking-calendar');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\Payment\VNPayService;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\SystemNotification;
 
 class PaymentController extends Controller
 {
@@ -47,6 +48,11 @@ class PaymentController extends Controller
                 ]);
             }
             if (auth()->check()) {
+                auth()->user()->notify(new SystemNotification(
+                    '✅ Thanh toán thành công',
+                    "Đơn đặt sân {$bookingCode} đã được thanh toán qua VNPay thành công!",
+                    'success'
+                ));
                 return redirect()->route('customer.dashboard')->with('success', 'Giao dịch VNPay thành công!');
             }
             return redirect()->route('home')->with('success', 'Giao dịch VNPay thành công! Mã đơn hàng: ' . $bookingCode);

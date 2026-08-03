@@ -101,10 +101,10 @@
             <div class="mt-8 pt-6 border-t border-slate-100 text-center relative">
                 <span class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-xs font-semibold text-slate-400 uppercase tracking-widest">Hoặc</span>
                 
-                <button class="mt-4 w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3">
+                <a href="{{ route('auth.google') }}" class="mt-4 w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3">
                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
                     Đăng nhập bằng Google
-                </button>
+                </a>
             </div>
             
             <div class="mt-8 text-center text-sm">

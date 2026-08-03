@@ -65,14 +65,34 @@ class DummyDataSeeder extends Seeder
 
         $f3 = Field::create([
             'field_type_id' => $type11->id,
-            'name' => 'Sân Vận Động Chính',
+            'name' => 'Sân Vận Động Chính (Sân 11)',
             'slug' => 'san-van-dong-chinh',
-            'description' => 'Sân 11 chuyên nghiệp.',
+            'description' => 'Sân 11 chuyên nghiệp. Có thể tách thành 2 sân 7.',
             'base_price' => 1200000,
             'status' => 'available',
         ]);
         \Illuminate\Support\Facades\DB::table('field_images')->insert([
             ['field_id' => $f3->id, 'image_path' => 'https://images.unsplash.com/photo-1556816723-1ce827b9ebe1?w=800&q=80', 'is_primary' => true]
+        ]);
+
+        // Tình huống 4: Tạo 2 sân 7 là con của sân 11
+        Field::create([
+            'parent_id' => $f3->id,
+            'field_type_id' => $type7->id,
+            'name' => 'Sân 7C (Thuộc Sân Chính)',
+            'slug' => 'san-7c-thuoc-san-chinh',
+            'description' => 'Nửa sân của Sân Vận Động Chính',
+            'base_price' => 600000,
+            'status' => 'available',
+        ]);
+        Field::create([
+            'parent_id' => $f3->id,
+            'field_type_id' => $type7->id,
+            'name' => 'Sân 7D (Thuộc Sân Chính)',
+            'slug' => 'san-7d-thuoc-san-chinh',
+            'description' => 'Nửa sân của Sân Vận Động Chính',
+            'base_price' => 600000,
+            'status' => 'available',
         ]);
 
         // 4. Time Slots (1-hour each from 06:00 to 23:00)
