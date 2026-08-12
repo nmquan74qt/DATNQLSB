@@ -27,6 +27,24 @@ class VoucherController extends Controller
         return redirect()->back()->with('success', 'Tạo Voucher thành công!');
     }
 
+    public function autoGenerate()
+    {
+        $code = 'AUTO' . strtoupper(\Illuminate\Support\Str::random(6));
+        $discount = rand(1, 4) * 5; // 5%, 10%, 15%, 20%
+        
+        $this->voucherRepo->create([
+            'code' => $code,
+            'name' => 'Voucher Tự Động Giảm ' . $discount . '%',
+            'discount_percent' => $discount,
+            'max_uses' => 100,
+            'valid_from' => now(),
+            'valid_to' => now()->addDays(7), // Hết hạn sau 7 ngày
+            'is_active' => true,
+        ]);
+        
+        return redirect()->back()->with('success', 'Đã tạo ngẫu nhiên Voucher: ' . $code);
+    }
+
     public function update(Request $request, $id)
     {
         $validated = $request->validate([

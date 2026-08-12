@@ -132,7 +132,7 @@
                 <!-- Field Card -->
                 <div class="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 relative" data-aos="fade-up" data-aos-delay="{{ ($index + 1) * 100 }}">
                     <div class="relative h-64 overflow-hidden">
-                        <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $field->name }}">
+                        <img src="{{ $field->image_url ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $field->name }}">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80"></div>
                         <div class="absolute top-4 right-4 {{ $field->status == 'available' ? 'bg-emerald-500' : 'bg-red-500' }} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                             @if($field->status == 'available')

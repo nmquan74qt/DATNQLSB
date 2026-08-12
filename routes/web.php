@@ -20,6 +20,22 @@ Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
 Route::get('/payment/create', [PaymentController::class, 'createPayment'])->name('payment.create');
 Route::get('/payment/vnpay-return', [PaymentController::class, 'vnpayReturn'])->name('payment.vnpay.return');
 
+Route::get('/payment/vnpay-mock', function (\Illuminate\Http\Request $request) {
+    return view('pages.vnpay_mock', [
+        'orderId' => $request->orderId,
+        'amount' => $request->amount,
+        'returnUrl' => route('payment.vnpay.return')
+    ]);
+})->name('payment.vnpay.mock');
+Route::get('/payment/momo-return', [PaymentController::class, 'momoReturn'])->name('payment.momo.return');
+
+Route::get('/payment/momo-mock', function (\Illuminate\Http\Request $request) {
+    return view('pages.momo_mock', [
+        'orderId' => $request->orderId,
+        'amount' => $request->amount,
+        'returnUrl' => route('payment.momo.return')
+    ]);
+})->name('payment.momo.mock');
 // Auth Routes
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthController::class, 'showLogin'])->name('login');
@@ -38,6 +54,12 @@ Route::middleware('auth')->group(function () {
     // Protected Booking Actions
     Route::post('/book', [App\Http\Controllers\BookingController::class, 'store'])->name('book');
     Route::post('/voucher/check', [App\Http\Controllers\BookingController::class, 'checkVoucher'])->name('voucher.check');
+
+    // Notifications (Shared for all logged-in users)
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+    Route::get('/notifications/demo', [\App\Http\Controllers\NotificationController::class, 'demo'])->name('notifications.demo');
+    Route::get('/notifications/poll', [\App\Http\Controllers\NotificationController::class, 'poll'])->name('notifications.poll');
 
     // Admin & Staff Area (Shared POS Console)
     Route::prefix('admin')->middleware('role:admin,staff')->name('admin.')->group(function () {
@@ -60,6 +82,9 @@ Route::middleware('auth')->group(function () {
         
         // Admin Only Area (Configuration & Sensitive Data)
         Route::middleware('role:admin')->group(function () {
+            Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+            Route::post('/notifications/send', [\App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('notifications.send');
+            
             Route::resource('fields', \App\Http\Controllers\FieldController::class);
             Route::resource('time-slots', \App\Http\Controllers\Admin\TimeSlotController::class)->except(['create', 'edit', 'show']);
             Route::resource('staff', \App\Http\Controllers\Admin\StaffController::class)->except(['create', 'edit', 'show']);
@@ -69,6 +94,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/system/backup', [\App\Http\Controllers\Admin\SystemController::class, 'backupDatabase'])->name('system.backup');
             Route::get('/vouchers', [\App\Http\Controllers\VoucherController::class, 'index'])->name('vouchers.index');
             Route::post('/vouchers', [\App\Http\Controllers\VoucherController::class, 'store'])->name('vouchers.store');
+            Route::post('/vouchers/auto', [\App\Http\Controllers\VoucherController::class, 'autoGenerate'])->name('vouchers.auto');
             Route::put('/vouchers/{id}', [\App\Http\Controllers\VoucherController::class, 'update'])->name('vouchers.update');
             Route::delete('/vouchers/{id}', [\App\Http\Controllers\VoucherController::class, 'destroy'])->name('vouchers.destroy');
             Route::resource('/posts', \App\Http\Controllers\Admin\PostController::class);
@@ -81,11 +107,5 @@ Route::middleware('auth')->group(function () {
         Route::put('/profile', [\App\Http\Controllers\CustomerController::class, 'updateProfile'])->name('profile.update');
         Route::put('/profile/password', [\App\Http\Controllers\CustomerController::class, 'updatePassword'])->name('profile.password');
         Route::put('/bookings/{id}/cancel', [\App\Http\Controllers\CustomerController::class, 'cancelBooking'])->name('bookings.cancel');
-
-        // Notifications
-        Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
-        Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.readAll');
-        Route::get('/notifications/demo', [\App\Http\Controllers\NotificationController::class, 'demo'])->name('notifications.demo');
-        Route::get('/notifications/poll', [\App\Http\Controllers\NotificationController::class, 'poll'])->name('notifications.poll');
     });
 });

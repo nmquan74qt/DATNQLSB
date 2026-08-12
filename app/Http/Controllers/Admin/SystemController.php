@@ -18,6 +18,7 @@ class SystemController extends Controller
                     ['value' => $value]
                 );
             }
+            \Illuminate\Support\Facades\Cache::forget('maintenance_mode_status');
             return redirect()->back()->with('success', 'Cập nhật cấu hình thành công!');
         }
 

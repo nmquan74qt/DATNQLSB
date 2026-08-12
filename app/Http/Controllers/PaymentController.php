@@ -53,9 +53,12 @@ class PaymentController extends Controller
                     "Đơn đặt sân {$bookingCode} đã được thanh toán qua VNPay thành công!",
                     'success'
                 ));
-                return redirect()->route('customer.dashboard')->with('success', 'Giao dịch VNPay thành công!');
+                if (auth()->user()->role === 'admin' || auth()->user()->role === 'staff') {
+                    return redirect()->route('fields.index')->with('success', 'Giao dịch VNPay thành công!');
+                }
+                return redirect()->route('fields.index')->with('success', 'Giao dịch VNPay thành công!');
             }
-            return redirect()->route('home')->with('success', 'Giao dịch VNPay thành công! Mã đơn hàng: ' . $bookingCode);
+            return redirect()->route('fields.index')->with('success', 'Giao dịch VNPay thành công! Mã đơn hàng: ' . $bookingCode);
         }
         
         if ($booking && $booking->status == 'pending') {
@@ -63,8 +66,58 @@ class PaymentController extends Controller
         }
 
         if (auth()->check()) {
+            if (auth()->user()->role === 'admin' || auth()->user()->role === 'staff') {
+                return redirect()->route('admin.dashboard')->with('error', 'Giao dịch bị hủy hoặc thất bại.');
+            }
             return redirect()->route('customer.dashboard')->with('error', 'Giao dịch bị hủy hoặc thất bại.');
         }
         return redirect()->route('home')->with('error', 'Giao dịch bị hủy hoặc thất bại.');
+    }
+
+    public function momoReturn(Request $request)
+    {
+        $momoService = new \App\Services\Payment\MoMoService();
+        $result = $momoService->verifyPayment($request->all());
+
+        $bookingCode = $request->orderId;
+        $booking = \App\Models\Booking::where('booking_code', $bookingCode)->first();
+
+        if ($result['success']) {
+            if ($booking) {
+                $booking->update(['status' => 'confirmed']);
+                
+                \App\Models\Payment::create([
+                    'booking_id' => $booking->id,
+                    'transaction_id' => $result['transId'] ?? 'MOMO' . time(),
+                    'amount' => $booking->total_amount,
+                    'payment_method' => 'momo',
+                    'status' => 'success'
+                ]);
+            }
+            if (auth()->check()) {
+                auth()->user()->notify(new SystemNotification(
+                    '✅ Thanh toán thành công',
+                    "Đơn đặt sân {$bookingCode} đã được thanh toán qua MoMo thành công!",
+                    'success'
+                ));
+                if (auth()->user()->role === 'admin' || auth()->user()->role === 'staff') {
+                    return redirect()->route('fields.index')->with('success', 'Giao dịch MoMo thành công!');
+                }
+                return redirect()->route('fields.index')->with('success', 'Giao dịch MoMo thành công!');
+            }
+            return redirect()->route('fields.index')->with('success', 'Giao dịch MoMo thành công! Mã đơn hàng: ' . $bookingCode);
+        }
+        
+        if ($booking && $booking->status == 'pending') {
+            $booking->update(['status' => 'cancelled']);
+        }
+
+        if (auth()->check()) {
+            if (auth()->user()->role === 'admin' || auth()->user()->role === 'staff') {
+                return redirect()->route('admin.dashboard')->with('error', 'Giao dịch MoMo bị hủy hoặc thất bại.');
+            }
+            return redirect()->route('customer.dashboard')->with('error', 'Giao dịch MoMo bị hủy hoặc thất bại.');
+        }
+        return redirect()->route('home')->with('error', 'Giao dịch MoMo bị hủy hoặc thất bại.');
     }
 }

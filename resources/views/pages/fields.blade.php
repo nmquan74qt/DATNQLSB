@@ -37,7 +37,7 @@
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Từ khóa</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" name="q" placeholder="Tên sân..." class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary/50 text-slate-700 dark:text-slate-200 shadow-inner transition-all">
+                                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Tên sân..." class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary/50 text-slate-700 dark:text-slate-200 shadow-inner transition-all">
                                 </div>
                             </div>
 
@@ -46,28 +46,31 @@
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Loại Sân</label>
                                 <div class="space-y-2">
                                     <label class="flex items-center gap-3 cursor-pointer group">
-                                        <input type="radio" name="type" value="" class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
+                                        <input type="radio" name="type" value="" {{ request('type') == '' ? 'checked' : '' }} class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
                                         <span class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Tất cả</span>
                                     </label>
                                     <label class="flex items-center gap-3 cursor-pointer group">
-                                        <input type="radio" name="type" value="5" class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
+                                        <input type="radio" name="type" value="5" {{ request('type') == '5' ? 'checked' : '' }} class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
                                         <span class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Sân 5 Người</span>
                                     </label>
                                     <label class="flex items-center gap-3 cursor-pointer group">
-                                        <input type="radio" name="type" value="7" class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
+                                        <input type="radio" name="type" value="7" {{ request('type') == '7' ? 'checked' : '' }} class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
                                         <span class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Sân 7 Người</span>
                                     </label>
                                     <label class="flex items-center gap-3 cursor-pointer group">
-                                        <input type="radio" name="type" value="11" class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
+                                        <input type="radio" name="type" value="11" {{ request('type') == '11' ? 'checked' : '' }} class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600">
                                         <span class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Sân 11 Người</span>
                                     </label>
                                 </div>
                             </div>
 
                             <!-- Price Range -->
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Mức Giá / Giờ</label>
-                                <input type="range" min="100000" max="2000000" step="50000" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-primary">
+                            <div x-data="{ price: {{ request('price', 2000000) }} }">
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex justify-between">
+                                    <span>Mức Giá Tối Đa</span>
+                                    <span class="text-primary" x-text="new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)"></span>
+                                </label>
+                                <input type="range" name="price" x-model="price" min="100000" max="2000000" step="50000" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-primary">
                                 <div class="flex justify-between mt-2 text-xs font-bold text-slate-500">
                                     <span>100k</span>
                                     <span>2tr+</span>
@@ -87,10 +90,10 @@
                     <!-- Toolbar -->
                     <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm mb-6 flex justify-between items-center" data-aos="fade-up">
                         <p class="text-sm font-bold text-slate-600 dark:text-slate-400">Hiển thị <span class="text-primary">{{ $fields->count() }}</span> sân bóng</p>
-                        <select class="bg-slate-50 dark:bg-slate-900 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 text-slate-700 dark:text-slate-200 font-medium">
-                            <option value="newest">Mới nhất</option>
-                            <option value="price_asc">Giá: Thấp đến Cao</option>
-                            <option value="price_desc">Giá: Cao đến Thấp</option>
+                        <select onchange="window.location.href=this.options[this.selectedIndex].getAttribute('data-url')" class="bg-slate-50 dark:bg-slate-900 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 text-slate-700 dark:text-slate-200 font-medium">
+                            <option value="newest" data-url="{{ request()->fullUrlWithQuery(['sort' => 'newest']) }}" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>Mới nhất</option>
+                            <option value="price_asc" data-url="{{ request()->fullUrlWithQuery(['sort' => 'price_asc']) }}" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá: Thấp đến Cao</option>
+                            <option value="price_desc" data-url="{{ request()->fullUrlWithQuery(['sort' => 'price_desc']) }}" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá: Cao đến Thấp</option>
                         </select>
                     </div>
 
@@ -103,9 +106,9 @@
                                 <!-- Glass Reflection overlay -->
                                 <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-20 pointer-events-none transform -translate-x-full group-hover:translate-x-full" style="transition-property: transform, opacity;"></div>
                                 
-                                <div class="relative h-56 overflow-hidden interactive">
-                                    <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $field->name }}">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300"></div>
+                                <div class="h-48 sm:h-56 overflow-hidden relative group">
+                                    <img src="{{ $field->image_url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $field->name }}">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300"></div>
                                     
                                     <!-- Badges -->
                                     <div class="absolute top-4 right-4 flex gap-2">

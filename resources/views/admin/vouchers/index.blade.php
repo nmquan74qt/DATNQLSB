@@ -6,9 +6,17 @@
         <h1 class="text-2xl font-bold font-heading text-slate-900 dark:text-white">Chiến Dịch Khuyến Mãi</h1>
         <p class="text-sm text-slate-500">Quản lý Voucher, Coupon và Flash Sale</p>
     </div>
-    <button onclick="document.getElementById('addVoucherModal').classList.remove('hidden')" class="bg-primary hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-xl shadow-md flex items-center gap-2 magnetic-btn">
-        <i class="fa-solid fa-plus"></i> <span class="btn-text">Tạo Voucher Mới</span>
-    </button>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <form action="{{ route('admin.vouchers.auto') }}" method="POST" class="m-0">
+            @csrf
+            <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl shadow-md shadow-amber-500/20 flex items-center gap-2 transition-transform hover:-translate-y-0.5">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Tạo Tự Động</span>
+            </button>
+        </form>
+        <button onclick="document.getElementById('addVoucherModal').classList.remove('hidden')" class="bg-primary hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-xl shadow-md shadow-primary/20 flex items-center gap-2 magnetic-btn transition-transform hover:-translate-y-0.5">
+            <i class="fa-solid fa-plus"></i> <span class="btn-text">Tạo Voucher Mới</span>
+        </button>
+    </div>
 </div>
 @endsection
 

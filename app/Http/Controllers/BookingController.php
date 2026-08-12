@@ -30,6 +30,9 @@ class BookingController extends Controller
             if (!$field) {
                 return response()->json(['success' => false, 'message' => 'Sân không tồn tại.']);
             }
+            if (!$field->is_active || $field->status === 'maintenance') {
+                return response()->json(['success' => false, 'message' => 'Sân đang bảo trì, không thể đặt lịch lúc này.']);
+            }
 
             $timeSlots = [];
             $realTotalAmount = 0; // Tình huống 2: Tính tổng tiền backend
@@ -170,6 +173,22 @@ class BookingController extends Controller
                 ]);
             }
 
+            if ($request->payment_method === 'momo') {
+                $momoService = new \App\Services\Payment\MoMoService();
+                $redirectUrl = $momoService->createPaymentUrl(
+                    $booking->booking_code, 
+                    $booking->total_amount, 
+                    "Thanh toan dat san " . $booking->booking_code
+                );
+                
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Đang chuyển hướng đến MoMo...',
+                    'booking_code' => $booking->booking_code,
+                    'redirect_url' => $redirectUrl
+                ]);
+            }
+
             if (auth()->check()) {
                 auth()->user()->notify(new SystemNotification(
                     '⚽ Đặt sân thành công',
@@ -291,11 +310,22 @@ class BookingController extends Controller
             $timeString = $current->format('H:i:s');
             
             // Lấy modifier của khung giờ này (Giờ vàng)
-            $slot = \App\Models\TimeSlot::where('start_time', '<=', $timeString)
+            $slot = \App\Models\TimeSlot::where('is_active', true)
+                            ->where(function($q) use ($field) {
+                                $q->whereNull('field_id')->orWhere('field_id', $field->id);
+                            })
+                            ->where('start_time', '<=', $timeString)
                             ->where('end_time', '>', $timeString)
+                            ->orderBy('field_id', 'desc') // Ưu tiên khung giờ riêng của sân
                             ->first();
                             
-            $modifier = $slot ? $slot->price_modifier : 0;
+            $isWeekend = $current->isWeekend();
+            
+            $modifier = 0;
+            if ($slot) {
+                $modifier = $isWeekend ? ($slot->weekend_price_modifier ?? 0) : ($slot->price_modifier ?? 0);
+            }
+            
             $hourlyRate = $basePricePerHour + $modifier;
             
             $calculatedTotal += $hourlyRate * $hourFraction;

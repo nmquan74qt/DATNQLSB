@@ -32,39 +32,48 @@
                         </button>
                         
                         <!-- Dropdown -->
-                        <div x-show="open" @click.away="open = false" x-transition.origin.top.right x-cloak class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
-                            <div class="flex justify-between items-center p-4 border-b border-slate-50 bg-slate-50/50">
+                        <div x-show="open" @click.away="open = false" x-transition.origin.top.right x-cloak class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+                            <div class="px-4 py-2 border-b border-slate-100 flex justify-between items-center">
                                 <h3 class="font-bold text-slate-800">Thông báo</h3>
-                                <button @click="markAllRead" class="text-xs font-medium text-primary hover:text-blue-700 transition-colors">Đánh dấu tất cả đã đọc</button>
+                                <button @click="markAllRead" class="text-xs text-primary hover:underline font-medium">Đánh dấu tất cả đã đọc</button>
                             </div>
                             <div class="max-h-80 overflow-y-auto custom-scrollbar">
                                 <template x-for="notif in notifications" :key="notif.id">
-                                    <div class="p-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors" @click="markAsRead(notif.id)">
-                                        <div class="flex gap-3">
-                                            <div class="shrink-0 mt-1">
-                                                <span x-show="notif.data.type === 'success'" class="text-emerald-500"><i class="fa-solid fa-square-check"></i></span>
-                                                <span x-show="notif.data.type === 'info'" class="text-blue-500"><i class="fa-solid fa-info-circle"></i></span>
-                                                <span x-show="notif.data.type === 'warning'" class="text-amber-500"><i class="fa-solid fa-exclamation-triangle"></i></span>
-                                                <span x-show="notif.data.type === 'promo'" class="text-pink-500"><i class="fa-solid fa-gift"></i></span>
-                                            </div>
-                                            <div>
-                                                <p class="text-sm font-bold text-slate-800" x-text="notif.data.title"></p>
-                                                <p class="text-sm text-slate-600 mt-0.5 line-clamp-2" x-text="notif.data.message"></p>
-                                                <p class="text-xs text-slate-400 mt-1" x-text="formatTime(notif.created_at)"></p>
-                                            </div>
-                                            <div x-show="notif.read_at === null" class="shrink-0 mt-1 ml-auto">
-                                                <div class="w-2 h-2 bg-primary rounded-full"></div>
-                                            </div>
+                                    <a href="javascript:void(0);" class="px-4 py-3 hover:bg-slate-50 flex gap-3 transition-colors border-b border-slate-50" @click="markAsRead(notif.id)">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                                             :class="{
+                                                 'bg-emerald-100 text-emerald-500': notif.data.type === 'success',
+                                                 'bg-blue-100 text-blue-500': notif.data.type === 'info',
+                                                 'bg-amber-100 text-amber-500': notif.data.type === 'warning',
+                                                 'bg-pink-100 text-pink-500': notif.data.type === 'promo',
+                                                 'bg-primary/10 text-primary': !['success', 'info', 'warning', 'promo'].includes(notif.data.type)
+                                             }">
+                                            <i class="fa-solid"
+                                               :class="{
+                                                   'fa-check': notif.data.type === 'success',
+                                                   'fa-info': notif.data.type === 'info',
+                                                   'fa-exclamation': notif.data.type === 'warning',
+                                                   'fa-gift': notif.data.type === 'promo',
+                                                   'fa-bell': !['success', 'info', 'warning', 'promo'].includes(notif.data.type)
+                                               }"></i>
                                         </div>
-                                    </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-slate-800" :class="{ 'font-bold': notif.read_at === null }" x-text="notif.data.title"></p>
+                                            <p class="text-xs text-slate-500 mt-1 line-clamp-1" x-text="notif.data.message"></p>
+                                            <p class="text-xs text-slate-400 mt-1" x-text="formatTime(notif.created_at)"></p>
+                                        </div>
+                                        <div x-show="notif.read_at === null" class="shrink-0 mt-1 ml-auto">
+                                            <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        </div>
+                                    </a>
                                 </template>
                                 <div x-show="notifications.length === 0" class="p-8 text-center text-slate-500">
                                     <i class="fa-regular fa-bell-slash text-3xl mb-2 text-slate-200"></i>
                                     <p class="text-sm">Không có thông báo nào</p>
                                 </div>
                             </div>
-                            <div class="p-3 border-t border-slate-50 bg-slate-50/50 text-center">
-                                <a href="#" class="text-sm font-medium text-primary hover:text-blue-700 transition-colors">Xem tất cả thông báo</a>
+                            <div class="px-4 py-2 border-t border-slate-100 text-center">
+                                <a href="#" class="text-sm font-medium text-primary hover:underline">Xem tất cả</a>
                             </div>
                         </div>
 
@@ -178,7 +187,7 @@
 
             fetchNotifications() {
                 // Using the unread poll endpoint initially just to get current state
-                fetch('{{ route('customer.notifications.poll') ?? '/customer/notifications/poll' }}')
+                fetch('{{ route('notifications.poll') ?? '/notifications/poll' }}')
                     .then(res => res.json())
                     .then(data => {
                         this.notifications = data.notifications;
@@ -190,7 +199,7 @@
 
             pollNewNotifications() {
                 if (!this.lastCheck) return;
-                fetch(`{{ route('customer.notifications.poll') ?? '/customer/notifications/poll' }}?last_check=${this.lastCheck}`)
+                fetch(`{{ route('notifications.poll') ?? '/notifications/poll' }}?last_check=${encodeURIComponent(this.lastCheck)}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.notifications && data.notifications.length > 0) {
@@ -221,7 +230,7 @@
             },
 
             markAsRead(id) {
-                fetch(`/customer/notifications/${id}/read`, {
+                fetch(`/notifications/${id}/read`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -237,7 +246,7 @@
             },
 
             markAllRead() {
-                fetch(`/customer/notifications/read-all`, {
+                fetch(`/notifications/read-all`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

@@ -33,9 +33,11 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">
+                        <th class="px-6 py-4">Sân Áp Dụng</th>
                         <th class="px-6 py-4">Giờ Bắt Đầu</th>
                         <th class="px-6 py-4">Giờ Kết Thúc</th>
-                        <th class="px-6 py-4">Phụ thu / Giảm giá</th>
+                        <th class="px-6 py-4">Phụ thu (Ngày thường)</th>
+                        <th class="px-6 py-4">Phụ thu (Cuối tuần)</th>
                         <th class="px-6 py-4">Trạng thái</th>
                         <th class="px-6 py-4 text-right">Thao tác</th>
                     </tr>
@@ -43,6 +45,9 @@
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
                     @forelse($timeSlots as $slot)
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <td class="px-6 py-4 font-bold text-primary">
+                            {{ $slot->field ? $slot->field->name : 'Áp dụng chung (Tất cả)' }}
+                        </td>
                         <td class="px-6 py-4 font-bold text-slate-800 dark:text-white">
                             {{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }}
                         </td>
@@ -54,6 +59,15 @@
                                 <span class="text-red-500 font-bold">+{{ number_format($slot->price_modifier) }}đ</span>
                             @elseif($slot->price_modifier < 0)
                                 <span class="text-emerald-500 font-bold">{{ number_format($slot->price_modifier) }}đ</span>
+                            @else
+                                <span class="text-slate-500">Giữ nguyên</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($slot->weekend_price_modifier > 0)
+                                <span class="text-red-500 font-bold">+{{ number_format($slot->weekend_price_modifier) }}đ</span>
+                            @elseif($slot->weekend_price_modifier < 0)
+                                <span class="text-emerald-500 font-bold">{{ number_format($slot->weekend_price_modifier) }}đ</span>
                             @else
                                 <span class="text-slate-500">Giữ nguyên</span>
                             @endif
@@ -112,6 +126,15 @@
                     <input type="hidden" name="_method" :value="isEditing ? 'PUT' : 'POST'">
                     
                     <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Sân Áp Dụng</label>
+                            <select name="field_id" x-model="formData.field_id" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary/50 transition-all">
+                                <option value="">-- Áp dụng chung cho tất cả sân --</option>
+                                @foreach($fields as $field)
+                                    <option value="{{ $field->id }}">{{ $field->name }} (Sân {{ $field->fieldType->name }})</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Giờ bắt đầu</label>
@@ -123,10 +146,21 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Phụ thu (VND)</label>
-                            <input type="number" name="price_modifier" x-model="formData.price_modifier" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary/50 transition-all" required>
-                            <p class="text-xs text-slate-500 mt-1">VD: Nhập 20000 để thu thêm 20k vào giờ vàng. Nhập -20000 để giảm giá 20k.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Phụ thu Ngày thường</label>
+                                <div class="relative">
+                                    <input type="number" name="price_modifier" x-model="formData.price_modifier" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl px-4 py-3 pr-10 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary/50 transition-all" required>
+                                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-sm">VND</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Phụ thu Cuối tuần (T7, CN)</label>
+                                <div class="relative">
+                                    <input type="number" name="weekend_price_modifier" x-model="formData.weekend_price_modifier" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl px-4 py-3 pr-10 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary/50 transition-all">
+                                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-sm">VND</span>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex items-center gap-3 pt-2">
@@ -154,24 +188,28 @@
             isEditing: false,
             formAction: '{{ route('admin.time-slots.store') }}',
             formData: {
+                field_id: '',
                 start_time: '',
                 end_time: '',
                 price_modifier: 0,
+                weekend_price_modifier: 0,
                 is_active: true
             },
             openCreateModal() {
                 this.isEditing = false;
                 this.formAction = '{{ route('admin.time-slots.store') }}';
-                this.formData = { start_time: '', end_time: '', price_modifier: 0, is_active: true };
+                this.formData = { field_id: '', start_time: '', end_time: '', price_modifier: 0, weekend_price_modifier: 0, is_active: true };
                 this.isModalOpen = true;
             },
             openEditModal(slot) {
                 this.isEditing = true;
                 this.formAction = '/admin/time-slots/' + slot.id;
                 this.formData = {
+                    field_id: slot.field_id || '',
                     start_time: slot.start_time.substring(0,5),
                     end_time: slot.end_time.substring(0,5),
                     price_modifier: parseFloat(slot.price_modifier),
+                    weekend_price_modifier: parseFloat(slot.weekend_price_modifier),
                     is_active: slot.is_active == 1
                 };
                 this.isModalOpen = true;

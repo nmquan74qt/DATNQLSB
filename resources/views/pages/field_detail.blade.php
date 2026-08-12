@@ -30,7 +30,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-2 h-[350px] md:h-[450px] rounded-2xl overflow-hidden shadow-sm" data-aos="fade-up" data-aos-delay="100">
                 <!-- Main Large Image -->
                 <div class="md:col-span-2 h-full relative group cursor-pointer overflow-hidden">
-                    <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $field->name }}">
+                    <img src="{{ $field->image_url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $field->name }}">
                     <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                 </div>
                 <!-- Right Side Images -->
@@ -39,9 +39,9 @@
                         'https://images.pexels.com/photos/47730/the-ball-stadion-football-the-pitch-47730.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
                         'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
                         'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
-                        'https://upload.wikimedia.org/wikipedia/commons/1/1a/Helsinki_football_pitch.jpg',
-                        'https://upload.wikimedia.org/wikipedia/commons/6/69/Match_de_football.jpg',
-                        'https://upload.wikimedia.org/wikipedia/commons/5/5a/Football_at_the_stadium.jpg'
+                        'https://images.pexels.com/photos/3628912/pexels-photo-3628912.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
+                        'https://images.pexels.com/photos/274422/pexels-photo-274422.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
+                        'https://images.pexels.com/photos/1618269/pexels-photo-1618269.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1'
                     ];
                     srand($field->id);
                     shuffle($gallery);
@@ -133,7 +133,7 @@
                                                         <span class="text-xs font-bold bg-red-100/60 px-2 py-0.5 rounded text-red-600">Đã đặt</span>
                                                     </template>
                                                     <template x-if="!isBooked(slot.id)">
-                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(basePrice + parseFloat(slot.price_modifier))"></span>
+                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(getSlotPrice(slot))"></span>
                                                     </template>
                                                 </button>
                                             </template>
@@ -163,7 +163,7 @@
                                                         <span class="text-xs font-bold bg-red-100/60 px-2 py-0.5 rounded text-red-600">Đã đặt</span>
                                                     </template>
                                                     <template x-if="!isBooked(slot.id)">
-                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(basePrice + parseFloat(slot.price_modifier))"></span>
+                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(getSlotPrice(slot))"></span>
                                                     </template>
                                                 </button>
                                             </template>
@@ -193,7 +193,7 @@
                                                         <span class="text-xs font-bold bg-red-100/60 px-2 py-0.5 rounded text-red-600">Đã đặt</span>
                                                     </template>
                                                     <template x-if="!isBooked(slot.id)">
-                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(basePrice + parseFloat(slot.price_modifier))"></span>
+                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(getSlotPrice(slot))"></span>
                                                     </template>
                                                 </button>
                                             </template>
@@ -271,7 +271,7 @@
                             <h3 class="text-lg font-bold text-slate-800 mb-4">Thông tin đặt sân</h3>
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/3 h-32 rounded-xl overflow-hidden shadow-sm">
-                                    <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}" class="w-full h-full object-cover" alt="{{ $field->name }}">
+                                    <img src="{{ $field->image_url }}" class="w-full h-full object-cover" alt="{{ $field->name }}">
                                 </div>
                                 <div class="flex-1 space-y-2">
                                     <h4 class="text-xl font-bold text-slate-900">{{ $field->name }}</h4>
@@ -326,7 +326,7 @@
                             <h3 class="text-lg font-bold text-slate-800 mb-4 pb-4 border-b border-slate-100">Tóm tắt đơn hàng</h3>
                             
                             <div class="flex items-start gap-3 mb-6">
-                                <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}" class="w-16 h-12 rounded object-cover shadow-sm">
+                                <img src="{{ $field->image_url }}" class="w-16 h-12 rounded object-cover shadow-sm">
                                 <div>
                                     <h4 class="font-bold text-sm text-slate-800 leading-tight">{{ $field->name }}</h4>
                                     <p class="text-xs text-slate-500">Sân {{ $field->fieldType->name }}</p>
@@ -485,6 +485,18 @@
                 return timeStr.substring(0, 5); // "17:00:00" -> "17:00"
             },
             
+            isWeekend() {
+                if (!this.selectedDate) return false;
+                const d = new Date(this.selectedDate);
+                const day = d.getDay();
+                return day === 0 || day === 6;
+            },
+            
+            getSlotPrice(slot) {
+                let modifier = this.isWeekend() ? (parseFloat(slot.weekend_price_modifier) || 0) : (parseFloat(slot.price_modifier) || 0);
+                return this.basePrice + modifier;
+            },
+            
             formatDateDisplay(isoDate) {
                 if(!isoDate) return '--';
                 const parts = isoDate.split('-');
@@ -523,7 +535,7 @@
                 if(this.selectedSlots.length === 0) return 0;
                 let total = 0;
                 this.selectedSlots.forEach(slot => {
-                    total += this.basePrice + parseFloat(slot.price_modifier);
+                    total += this.getSlotPrice(slot);
                 });
                 return total;
             },

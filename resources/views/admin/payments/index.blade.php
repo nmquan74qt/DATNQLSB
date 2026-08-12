@@ -50,13 +50,13 @@
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Thanh Toán Tiền Mặt</p>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Thanh Toán MoMo</p>
                     <h3 class="text-2xl font-black text-slate-800 dark:text-white font-heading">
-                        {{ number_format(\App\Models\Payment::where('status', 'success')->where('payment_method', 'cash')->sum('amount')) }}đ
+                        {{ number_format(\App\Models\Payment::where('status', 'success')->where('payment_method', 'momo')->sum('amount')) }}đ
                     </h3>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-money-bill-wave"></i>
+                <div class="w-10 h-10 rounded-xl bg-pink-50 text-pink-500 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-wallet"></i>
                 </div>
             </div>
         </div>
@@ -91,9 +91,13 @@
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
                                         <i class="fa-solid fa-credit-card"></i> VNPay
                                     </span>
+                                @elseif($payment->payment_method == 'momo')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-pink-50 text-pink-600 border border-pink-100">
+                                        <i class="fa-solid fa-wallet"></i> MoMo
+                                    </span>
                                 @else
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                        <i class="fa-solid fa-money-bill"></i> Tiền mặt
+                                        <i class="fa-solid fa-money-bill"></i> Trực tiếp tại sân
                                     </span>
                                 @endif
                             </td>

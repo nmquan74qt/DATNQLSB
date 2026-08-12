@@ -35,10 +35,19 @@ class FieldController extends Controller
             'base_price' => 'required|numeric|min:0',
             'status' => 'required|in:available,booked,in_use,maintenance',
             'description' => 'nullable|string',
-            'is_active' => 'nullable'
+            'is_active' => 'nullable',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $this->fieldService->createField($validated);
+        $storeData = $validated;
+        unset($storeData['images']);
+
+        if ($request->hasFile('images')) {
+            $imagePath = $request->file('images')[0]->store('fields', 'public');
+            $storeData['image'] = $imagePath;
+        }
+
+        $this->fieldService->createField($storeData);
 
         return redirect()->route('admin.fields.index')->with('success', 'Thêm sân bóng thành công!');
     }
@@ -58,10 +67,20 @@ class FieldController extends Controller
             'base_price' => 'required|numeric|min:0',
             'status' => 'required|in:available,booked,in_use,maintenance',
             'description' => 'nullable|string',
-            'is_active' => 'nullable'
+            'is_active' => 'nullable',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $this->fieldService->updateField($id, $validated);
+        $updateData = $validated;
+        unset($updateData['images']);
+
+        if ($request->hasFile('images')) {
+            // For now, save the first image to field->image
+            $imagePath = $request->file('images')[0]->store('fields', 'public');
+            $updateData['image'] = $imagePath;
+        }
+
+        $this->fieldService->updateField($id, $updateData);
 
         return redirect()->route('admin.fields.index')->with('success', 'Cập nhật sân bóng thành công!');
     }

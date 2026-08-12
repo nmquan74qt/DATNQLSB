@@ -61,19 +61,7 @@
                                     <p class="text-xs text-slate-500 text-center">Bạn đã đạt cấp bậc cao nhất!</p>
                                 @endif
                                 
-                                <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
-                                    <div class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                                                <i class="fa-solid fa-wallet"></i>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Ví cá nhân</p>
-                                                <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($user->wallet_balance ?? 0) }} đ</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -115,9 +103,7 @@
                         <button @click="tab = 'history'" :class="tab === 'history' ? 'bg-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'" class="flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
                             <i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Đặt Sân
                         </button>
-                        <button @click="tab = 'wallet'" :class="tab === 'wallet' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'" class="flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-wallet"></i> Lịch Sử Ví
-                        </button>
+
                     </div>
 
                     <!-- Profile Tab -->
@@ -310,47 +296,7 @@
                         </div>
                     </div>
 
-                    <!-- Wallet History Tab -->
-                    <div x-show="tab === 'wallet'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="space-y-6">
-                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
-                            <div class="flex justify-between items-center mb-6 border-b pb-4">
-                                <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white">Biến Động Số Dư</h3>
-                            </div>
-                            
-                            @if(isset($walletTransactions) && $walletTransactions->isEmpty())
-                                <div class="text-center py-12">
-                                    <div class="w-32 h-32 mx-auto bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-4xl text-slate-300 dark:text-slate-600 mb-4">
-                                        <i class="fa-solid fa-wallet"></i>
-                                    </div>
-                                    <h4 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Chưa có giao dịch nào</h4>
-                                    <p class="text-sm text-slate-500">Các khoản hoàn tiền khi hủy sân sẽ được cộng trực tiếp vào ví này.</p>
-                                </div>
-                            @elseif(isset($walletTransactions))
-                                <div class="space-y-3">
-                                    @foreach($walletTransactions as $transaction)
-                                        <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
-                                            <div class="flex items-center gap-4">
-                                                <div class="w-12 h-12 rounded-full flex items-center justify-center 
-                                                    {{ $transaction->type === 'refund' || $transaction->type === 'deposit' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600' }}">
-                                                    <i class="fa-solid {{ $transaction->type === 'refund' ? 'fa-arrow-rotate-left' : ($transaction->type === 'deposit' ? 'fa-arrow-down' : 'fa-arrow-up') }}"></i>
-                                                </div>
-                                                <div>
-                                                    <h4 class="font-bold text-slate-900 dark:text-white">{{ $transaction->description ?? 'Giao dịch ví' }}</h4>
-                                                    <p class="text-xs text-slate-500"><i class="fa-regular fa-clock"></i> {{ $transaction->created_at->format('d/m/Y H:i') }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="text-right">
-                                                <p class="font-bold {{ $transaction->type === 'refund' || $transaction->type === 'deposit' ? 'text-emerald-500' : 'text-red-500' }}">
-                                                    {{ $transaction->type === 'refund' || $transaction->type === 'deposit' ? '+' : '-' }}{{ number_format($transaction->amount) }}đ
-                                                </p>
-                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase">Thành công</span>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>

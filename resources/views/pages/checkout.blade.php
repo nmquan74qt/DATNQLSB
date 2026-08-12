@@ -16,21 +16,42 @@
         <div class="grid grid-cols-12 gap-8">
             <!-- Left: Details -->
             <div class="col-span-12 lg:col-span-8 space-y-6">
-                <!-- Thông tin đặt sân -->
-                <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-800 mb-5">Thông tin đặt sân</h3>
-                    <div class="flex flex-col sm:flex-row gap-5">
-                        <div class="w-full sm:w-56 h-36 shrink-0 rounded-xl overflow-hidden border border-slate-100 shadow-sm">
-                            <img src="{{ !empty($field->image) ? (str_starts_with($field->image, 'http') ? $field->image : asset('storage/' . $field->image)) : 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}" class="w-full h-full object-cover" alt="{{ $field->name }}">
+                <!-- Thông tin đặt sân (Enterprise Banner Layout) -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-6">
+                    <!-- Banner Image -->
+                    <div class="w-full h-48 bg-slate-100 relative flex items-center justify-center">
+                        <i class="fa-solid fa-image text-slate-300 text-5xl absolute z-0"></i>
+                        <img src="{{ $field->image_url }}" onerror="this.style.display='none'" class="w-full h-full object-cover relative z-10" alt="{{ $field->name }}">
+                        
+                        <!-- Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent z-20"></div>
+                        
+                        <!-- Text -->
+                        <div class="absolute bottom-0 left-0 w-full p-6 z-30">
+                            <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1 shadow-sm">Thông tin đặt sân</h3>
+                            <h4 class="text-3xl font-extrabold text-white drop-shadow-md">{{ $field->name }}</h4>
+                            <p class="text-sm text-slate-200 mt-2 flex items-center gap-2 drop-shadow"><i class="fa-solid fa-location-dot text-emerald-400"></i> Cơ sở Trung Tâm, Hà Nội</p>
                         </div>
-                        <div class="flex-1 min-w-0 flex flex-col justify-center space-y-2">
-                            <h4 class="text-xl font-bold text-slate-900 truncate">{{ $field->name }}</h4>
-                            <p class="text-sm text-slate-500 flex items-center gap-2 truncate"><i class="fa-solid fa-location-dot w-4 text-slate-400 shrink-0"></i> <span class="truncate">Cơ sở Trung Tâm, Hà Nội</span></p>
-                            <p class="text-sm text-slate-500 flex items-center gap-2 truncate"><i class="fa-regular fa-calendar w-4 text-slate-400 shrink-0"></i> <span class="truncate" x-text="formatDateDisplayWithDay('{{ $date }}')"></span></p>
-                            <div class="mt-2">
-                                <span class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-100/80 px-3 py-1.5 rounded-lg whitespace-nowrap">
-                                    <i class="fa-regular fa-clock"></i> <span>{{ substr($timeSlots->first()->start_time, 0, 5) }} - {{ substr($timeSlots->last()->end_time, 0, 5) }}</span>
-                                </span>
+                    </div>
+                    
+                    <!-- Details Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 bg-white">
+                        <div class="p-5 flex items-center gap-4 hover:bg-slate-50 transition-colors">
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
+                                <i class="fa-regular fa-calendar-check text-xl"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Ngày đá</p>
+                                <p class="font-bold text-slate-800 truncate" x-text="formatDateDisplayWithDay('{{ $date }}')"></p>
+                            </div>
+                        </div>
+                        <div class="p-5 flex items-center gap-4 hover:bg-slate-50 transition-colors">
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
+                                <i class="fa-regular fa-clock text-xl"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Khung giờ</p>
+                                <p class="font-bold text-slate-800 truncate">{{ substr($timeSlots->first()->start_time, 0, 5) }} - {{ substr($timeSlots->last()->end_time, 0, 5) }}</p>
                             </div>
                         </div>
                     </div>
@@ -80,10 +101,13 @@
                     <h3 class="text-lg font-bold text-slate-800 mb-5 pb-4 border-b border-slate-100">Tóm tắt đơn hàng</h3>
                     
                     <div class="flex items-start gap-3 mb-6">
-                        <img src="{{ !empty($field->image) ? (str_starts_with($field->image, 'http') ? $field->image : asset('storage/' . $field->image)) : 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}" class="w-16 h-12 shrink-0 rounded object-cover shadow-sm border border-slate-100">
+                        <div class="w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-sm border border-slate-100 relative bg-slate-50 flex items-center justify-center">
+                            <i class="fa-solid fa-image text-slate-300 absolute z-0 text-lg"></i>
+                            <img src="{{ $field->image_url }}" onerror="this.style.display='none'" class="w-full h-full object-cover relative z-10" alt="{{ $field->name }}">
+                        </div>
                         <div class="min-w-0">
                             <h4 class="font-bold text-sm text-slate-800 leading-tight truncate">{{ $field->name }}</h4>
-                            <p class="text-xs text-slate-500 mt-1 truncate">{{ $field->fieldType->name ?? 'Sân 5 người' }}</p>
+                            <p class="text-xs text-slate-500 mt-1 truncate">{{ $field->fieldType?->name ?? 'Sân 5 người' }}</p>
                         </div>
                     </div>
 
@@ -126,7 +150,7 @@
                     </div>
 
                     @auth
-                    <button @click="checkout()" :disabled="isProcessing || !customerName || !customerPhone" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                    <button @click="checkout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2" :class="isProcessing ? 'opacity-70 cursor-wait' : ''">
                         <span x-show="!isProcessing">Xác nhận thanh toán</span>
                         <span x-show="isProcessing"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...</span>
                     </button>
@@ -256,6 +280,12 @@
             checkout() {
                 if(!this.selectedDate || this.timeSlots.length === 0) return;
                 
+                if (!this.customerName || !this.customerName.trim() || !this.customerPhone || !this.customerPhone.trim()) {
+                    Swal.fire('Thiếu thông tin!', 'Vui lòng điền đầy đủ <b>Họ và tên</b> và <b>Số điện thoại</b> để tiếp tục.', 'warning');
+                    return;
+                }
+                
+                if (this.isProcessing) return;
                 this.isProcessing = true;
                 
                 Swal.fire({

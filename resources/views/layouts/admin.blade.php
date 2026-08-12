@@ -92,6 +92,11 @@
                     <i class="fa-solid fa-newspaper w-6 text-center text-lg"></i>
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Tin Tức / Blog</span>
                 </a>
+
+                <a href="{{ route('admin.notifications.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.notifications.*') ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-emerald-500 dark:text-slate-400' }}" title="Quản Lý Thông Báo">
+                    <i class="fa-regular fa-bell w-6 text-center text-lg"></i>
+                    <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Quản Lý Thông Báo</span>
+                </a>
                 @endif
 
                 <a href="{{ route('admin.bookings.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->requestUri == '/admin/bookings' || request()->routeIs('admin.bookings.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Lịch Đặt Sân">
