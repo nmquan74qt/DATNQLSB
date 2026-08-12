@@ -21,6 +21,24 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function poll(Request $request)
+    {
+        $lastCheck = $request->query('last_check');
+        $query = Auth::user()->unreadNotifications();
+        
+        if ($lastCheck) {
+            $query->where('created_at', '>', \Carbon\Carbon::parse($lastCheck));
+        }
+        
+        $notifications = $query->latest()->get();
+        
+        return response()->json([
+            'notifications' => $notifications,
+            'now' => now()->toIso8601String(),
+            'count' => Auth::user()->unreadNotifications()->count()
+        ]);
+    }
+
     public function demo()
     {
         $user = Auth::user();

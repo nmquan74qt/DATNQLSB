@@ -6,7 +6,7 @@
     <!-- Header with Animated Blobs & Parallax -->
     <div class="relative pt-32 pb-20 overflow-hidden bg-white border-b border-slate-100">
         <div class="absolute inset-0 z-0 parallax-bg">
-            <img src="https://images.unsplash.com/photo-1518605363189-9854359db5a3?auto=format&fit=crop&w=2070&q=80" class="w-full h-full object-cover opacity-10" alt="Background" />
+            <img src="https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=2070&h=1000&dpr=1" class="w-full h-full object-cover opacity-10" alt="Background" />
         </div>
         
         <!-- Animated Blobs -->
@@ -104,7 +104,7 @@
                                 <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-20 pointer-events-none transform -translate-x-full group-hover:translate-x-full" style="transition-property: transform, opacity;"></div>
                                 
                                 <div class="relative h-56 overflow-hidden interactive">
-                                    <img src="https://images.unsplash.com/photo-1518605363189-9854359db5a3?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $field->name }}">
+                                    <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $field->name }}">
                                     <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300"></div>
                                     
                                     <!-- Badges -->

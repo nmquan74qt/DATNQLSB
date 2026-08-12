@@ -30,7 +30,7 @@
         
         <!-- Left Side: Image / Branding -->
         <div class="hidden lg:block lg:w-1/2 relative bg-emerald-900">
-            <img src="https://images.unsplash.com/photo-1518605363189-9854359db5a3?q=80&w=2070&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" alt="Soccer Field">
+            <img src="https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=2070&h=1000&dpr=1" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" alt="Soccer Field">
             <div class="absolute inset-0 bg-gradient-to-t from-emerald-900/90 via-emerald-900/40 to-transparent"></div>
             
             <div class="absolute bottom-0 left-0 p-12 text-white">

@@ -301,6 +301,13 @@
             </div>
         </div>
     </div>
+
+    <!-- Global Hidden Form for List View Actions -->
+    <form id="globalStatusForm" method="POST" class="hidden">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="status" id="global_status_input">
+    </form>
 </div>
 @endsection
 
@@ -310,10 +317,14 @@
     
     document.addEventListener('alpine:init', () => {
         Alpine.data('bookingManager', () => ({
-            activeTab: 'calendar',
+            activeTab: sessionStorage.getItem('adminBookingTab') || 'calendar',
             isDetailsModalOpen: false,
             selectedBooking: null,
             bookings: window.bookingsData,
+            
+            init() {
+                this.$watch('activeTab', (val) => sessionStorage.setItem('adminBookingTab', val));
+            },
             
             openDetails(id) {
                 this.selectedBooking = this.bookings.find(b => b.id === id);
@@ -322,11 +333,14 @@
             
             submitStatus(status, id = null) {
                 if (id) {
-                    this.selectedBooking = this.bookings.find(b => b.id === id);
-                    document.getElementById('statusForm').action = '/admin/bookings/' + id + '/status';
+                    let form = document.getElementById('globalStatusForm');
+                    form.action = '/admin/bookings/' + id + '/status';
+                    document.getElementById('global_status_input').value = status;
+                    form.submit();
+                } else {
+                    document.getElementById('status_input').value = status;
+                    document.getElementById('statusForm').submit();
                 }
-                document.getElementById('status_input').value = status;
-                document.getElementById('statusForm').submit();
             }
         }));
     });

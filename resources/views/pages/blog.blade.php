@@ -6,7 +6,7 @@
     <!-- Header Parallax -->
     <div class="relative pt-32 pb-20 overflow-hidden bg-white group border-b border-slate-100">
         <div class="absolute inset-0 z-0 parallax-bg">
-            <img src="https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=2070&q=80" class="w-full h-full object-cover opacity-10 group-hover:scale-105 transition-transform duration-1000" alt="News Background" />
+            <img src="https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=2070&h=1000&dpr=1" class="w-full h-full object-cover opacity-10 group-hover:scale-105 transition-transform duration-1000" alt="News Background" />
             <div class="absolute inset-0 bg-gradient-to-b from-white/90 via-white/70 to-slate-50"></div>
         </div>
         

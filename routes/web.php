@@ -12,6 +12,7 @@ use App\Http\Controllers\PaymentController;
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/fields', [App\Http\Controllers\PageController::class, 'fields'])->name('fields.index');
 Route::get('/fields/{slug}', [App\Http\Controllers\PageController::class, 'fieldDetail'])->name('field.detail');
+Route::get('/checkout', [App\Http\Controllers\PageController::class, 'checkout'])->name('checkout');
 Route::get('/api/booking-status/{code}', [App\Http\Controllers\BookingController::class, 'checkPaymentStatus'])->name('api.booking.status');
 Route::get('/api/webhook/simulate/{code}', [App\Http\Controllers\BookingController::class, 'simulateWebhook'])->name('api.webhook.simulate');
 Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
@@ -85,5 +86,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.readAll');
         Route::get('/notifications/demo', [\App\Http\Controllers\NotificationController::class, 'demo'])->name('notifications.demo');
+        Route::get('/notifications/poll', [\App\Http\Controllers\NotificationController::class, 'poll'])->name('notifications.poll');
     });
 });

@@ -288,37 +288,15 @@ class BookingController extends Controller
 
         // Tình huống 5: Phạt quá giờ khi check-out (completed)
         if ($request->status === 'completed' && $booking->status !== 'completed') {
-            $actualEndTime = $request->actual_end_time ? \Carbon\Carbon::parse($request->actual_end_time) : now();
-            $totalOvertimeFee = 0;
+            $customEndTime = $request->actual_end_time ? \Carbon\Carbon::parse($request->actual_end_time) : null;
 
             foreach ($booking->details as $detail) {
-                if ($detail->end_time && $actualEndTime->gt($detail->end_time)) {
-                    $overtimeMinutes = $detail->end_time->diffInMinutes($actualEndTime);
-                    // Tính Phụ thu Quá giờ (Overtime) mới:
-                    // - Trễ < 10 phút: Miễn phí
-                    // - Trễ 10 - 30 phút: 50% giá 1h
-                    // - Trễ > 30 phút: 100% giá 1h
-                    $fee = 0;
-                    if ($overtimeMinutes >= 10 && $overtimeMinutes <= 30) {
-                        $fee = $detail->field->base_price * 0.50;
-                    } elseif ($overtimeMinutes > 30) {
-                        $fee = $detail->field->base_price * 1.00;
-                    }
-                    
-                    $detail->update([
-                        'actual_end_time' => $actualEndTime,
-                        'overtime_fee' => $fee
-                    ]);
-                    $totalOvertimeFee += $fee;
-                } else {
-                    $detail->update(['actual_end_time' => $actualEndTime]);
-                }
-            }
-
-            if ($totalOvertimeFee > 0) {
-                $booking->total_amount += $totalOvertimeFee;
-                $booking->notes = ($booking->notes ? $booking->notes . "\n" : '') . "Phụ thu quá giờ: " . number_format($totalOvertimeFee) . "đ";
-                $booking->save();
+                $actualEndTime = $customEndTime ?? $detail->end_time ?? now();
+                
+                $detail->update([
+                    'actual_end_time' => $actualEndTime,
+                    'overtime_fee' => 0
+                ]);
             }
 
             // Reward points

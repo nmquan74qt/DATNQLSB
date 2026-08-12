@@ -13,13 +13,13 @@ class GoogleController extends Controller
 {
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->setHttpClient(new \GuzzleHttp\Client(['verify' => false]))->redirect();
     }
 
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->setHttpClient(new \GuzzleHttp\Client(['verify' => false]))->user();
             
             // Tìm user dựa trên google_id
             $user = User::where('google_id', $googleUser->id)->first();
@@ -27,7 +27,7 @@ class GoogleController extends Controller
             if ($user) {
                 // Đăng nhập
                 Auth::login($user);
-                return redirect()->intended(route('customer.dashboard'));
+                return redirect()->intended(route('home'))->with('success', 'Đăng nhập thành công!');
             }
             
             // Nếu chưa có google_id, tìm qua email
@@ -39,7 +39,7 @@ class GoogleController extends Controller
                     'avatar' => $user->avatar ?? $googleUser->avatar
                 ]);
                 Auth::login($user);
-                return redirect()->intended(route('customer.dashboard'));
+                return redirect()->intended(route('home'))->with('success', 'Đăng nhập và liên kết tài khoản thành công!');
             }
             
             // Nếu chưa có tài khoản nào, tạo mới
@@ -53,7 +53,7 @@ class GoogleController extends Controller
             ]);
             
             Auth::login($newUser);
-            return redirect()->route('customer.dashboard')->with('success', 'Đăng nhập bằng Google thành công!');
+            return redirect()->route('home')->with('success', 'Đăng nhập bằng Google thành công!');
 
         } catch (\Exception $e) {
             return redirect()->route('login')->with('error', 'Lỗi đăng nhập bằng Google: ' . $e->getMessage());

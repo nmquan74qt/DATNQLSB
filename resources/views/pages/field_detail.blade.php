@@ -30,27 +30,41 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-2 h-[350px] md:h-[450px] rounded-2xl overflow-hidden shadow-sm" data-aos="fade-up" data-aos-delay="100">
                 <!-- Main Large Image -->
                 <div class="md:col-span-2 h-full relative group cursor-pointer overflow-hidden">
-                    <img src="{{ $field->image ?? 'https://images.unsplash.com/photo-1551958219-acbc608c6477?auto=format&fit=crop&w=2070&q=80' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $field->name }}">
+                    <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $field->name }}">
                     <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                 </div>
                 <!-- Right Side Images -->
+                @php
+                    $gallery = [
+                        'https://images.pexels.com/photos/47730/the-ball-stadion-football-the-pitch-47730.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
+                        'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
+                        'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
+                        'https://upload.wikimedia.org/wikipedia/commons/1/1a/Helsinki_football_pitch.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/6/69/Match_de_football.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/5/5a/Football_at_the_stadium.jpg'
+                    ];
+                    srand($field->id);
+                    shuffle($gallery);
+                    $side = array_slice($gallery, 0, 4);
+                    srand();
+                @endphp
                 <div class="hidden md:flex flex-col gap-2 h-full md:col-span-1">
                     <div class="h-1/2 relative group cursor-pointer overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Góc sân 1">
+                        <img src="{{ $side[0] }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Góc sân 1">
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                     </div>
                     <div class="h-1/2 relative group cursor-pointer overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Góc sân 2">
+                        <img src="{{ $side[1] }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Góc sân 2">
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                     </div>
                 </div>
                 <div class="hidden md:flex flex-col gap-2 h-full md:col-span-1">
                     <div class="h-1/2 relative group cursor-pointer overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1431324155629-1a6fc1ac5e52?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Trang thiết bị 1">
+                        <img src="{{ $side[2] }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Trang thiết bị 1">
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                     </div>
                     <div class="h-1/2 relative group cursor-pointer overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1508344928928-7165b67de128?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Trang thiết bị 2">
+                        <img src="{{ $side[3] }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Trang thiết bị 2">
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                     </div>
                 </div>
@@ -58,191 +72,325 @@
         </div>
     </div>
 
-    <div class="bg-slate-50 dark:bg-slate-900 py-12 relative z-20">
+    <div class="bg-slate-50 dark:bg-slate-900 py-12 relative z-20" x-data="bookingWizard()">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-12 gap-8">
-                
-                <!-- Info Section (Grid 4/12) -->
-                <div class="col-span-12 lg:col-span-4 space-y-8" data-aos="fade-right">
+            
+            <!-- STEP 1: Đặt sân -->
+            <div x-show="step === 1" x-transition.opacity>
+                <div class="grid grid-cols-12 gap-8">
                     
-                    <!-- Pricing Card with Animated Border -->
-                    <div class="relative bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl overflow-hidden group">
-                        <!-- Animated Border Effect (via pseudo element in CSS or simple div) -->
-                        <div class="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary opacity-20 blur-xl group-hover:opacity-40 transition-opacity duration-500"></div>
-                        
-                        <div class="relative z-10">
-                            <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Giá thuê sân</h3>
-                            <div class="flex items-end gap-2 mb-6">
-                                <span class="text-4xl font-heading font-extrabold text-slate-900 dark:text-white">{{ number_format($field->base_price) }}đ</span>
-                                <span class="text-lg font-medium text-slate-500 dark:text-slate-400 mb-1">/ giờ</span>
+                    <!-- Calendar & Time Selection (Grid 8/12) -->
+                    <div class="col-span-12 lg:col-span-8 space-y-8" data-aos="fade-up">
+                        <!-- Description -->
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white mb-4">Mô tả sân</h3>
+                            <div class="prose dark:prose-invert prose-slate max-w-none text-sm leading-relaxed">
+                                <p>{{ $field->description ?? 'Đang cập nhật mô tả...' }}</p>
+                                <p>Sân bóng cỏ nhân tạo chất lượng cao tại khu vực trung tâm. Sân tiêu chuẩn với hệ thống đèn chiếu sáng hiện đại, bãi đỗ xe rộng rãi.</p>
+                            </div>
+                        </div>
+
+                        <!-- Booking Calendar -->
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">Bảng giá - <span x-text="dates.find(d => d.isoString === selectedDate)?.dayName"></span></h2>
+                            
+                            <!-- Wizard Step 1: Select Date -->
+                            <div class="mb-8">
+                                <div class="flex overflow-x-auto pb-4 gap-3 snap-x hide-scroll">
+                                    <template x-for="(day, index) in dates" :key="index">
+                                        <button @click="selectDate(day.isoString)" 
+                                                :class="selectedDate === day.isoString ? 'bg-primary border-primary text-white shadow-md shadow-primary/30 transform scale-105' : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-primary/50'"
+                                                class="snap-start shrink-0 flex flex-col items-center justify-center w-20 h-24 rounded-2xl border transition-all duration-300 focus:outline-none">
+                                            <span class="text-xs font-medium uppercase mb-1" x-text="day.dayName"></span>
+                                            <span class="text-2xl font-bold font-heading leading-none mb-1" x-text="day.dayNum"></span>
+                                            <span class="text-xs opacity-80" x-text="'Thg ' + day.month"></span>
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
 
-                            <ul class="space-y-4 mb-8">
-                                <li class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
-                                    <i class="fa-solid fa-check text-emerald-500"></i> Miễn phí nước suối & bóng đá
-                                </li>
-                                <li class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
-                                    <i class="fa-solid fa-check text-emerald-500"></i> Hỗ trợ áo pitch (bib) miễn phí
-                                </li>
-                                <li class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
-                                    <i class="fa-solid fa-check text-emerald-500"></i> Đèn LED chuẩn FIFA chiếu sáng
-                                </li>
-                            </ul>
+                            <!-- Wizard Step 2: Select Time Slot -->
+                            <div x-show="selectedDate" x-transition>
+                                <template x-if="morningSlots.length > 0">
+                                    <div class="mb-6">
+                                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div> BUỔI SÁNG</h3>
+                                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                            <template x-for="slot in morningSlots" :key="slot.id">
+                                                <button @click="selectSlot(slot)"
+                                                        :disabled="isBooked(slot.id) || isPast(slot.start_time)"
+                                                        :class="[
+                                                            isBooked(slot.id) ? 'bg-red-50 border-red-200 cursor-not-allowed opacity-80 text-red-500' : 
+                                                            (isPast(slot.start_time) ? 'bg-slate-100 border-slate-200 cursor-not-allowed opacity-50 text-slate-500' :
+                                                            (selectedSlots.find(s => s.id === slot.id) ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-500/50 hover:text-emerald-500'))
+                                                        ]"
+                                                        class="flex items-center justify-between px-3 py-3 rounded-xl border transition-all duration-300 focus:outline-none group">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <i class="fa-regular fa-clock text-xs opacity-70"></i>
+                                                        <span class="font-medium text-sm" :class="(isBooked(slot.id) || isPast(slot.start_time)) ? 'line-through' : ''" x-text="formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time)"></span>
+                                                    </div>
+                                                    
+                                                    <template x-if="isBooked(slot.id)">
+                                                        <span class="text-xs font-bold bg-red-100/60 px-2 py-0.5 rounded text-red-600">Đã đặt</span>
+                                                    </template>
+                                                    <template x-if="!isBooked(slot.id)">
+                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(basePrice + parseFloat(slot.price_modifier))"></span>
+                                                    </template>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <template x-if="afternoonSlots.length > 0">
+                                    <div class="mb-6">
+                                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-orange-400"></div> BUỔI CHIỀU</h3>
+                                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                            <template x-for="slot in afternoonSlots" :key="slot.id">
+                                                <button @click="selectSlot(slot)"
+                                                        :disabled="isBooked(slot.id) || isPast(slot.start_time)"
+                                                        :class="[
+                                                            isBooked(slot.id) ? 'bg-red-50 border-red-200 cursor-not-allowed opacity-80 text-red-500' : 
+                                                            (isPast(slot.start_time) ? 'bg-slate-100 border-slate-200 cursor-not-allowed opacity-50 text-slate-500' :
+                                                            (selectedSlots.find(s => s.id === slot.id) ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-500/50 hover:text-emerald-500'))
+                                                        ]"
+                                                        class="flex items-center justify-between px-3 py-3 rounded-xl border transition-all duration-300 focus:outline-none group">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <i class="fa-regular fa-clock text-xs opacity-70"></i>
+                                                        <span class="font-medium text-sm" :class="(isBooked(slot.id) || isPast(slot.start_time)) ? 'line-through' : ''" x-text="formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time)"></span>
+                                                    </div>
+                                                    
+                                                    <template x-if="isBooked(slot.id)">
+                                                        <span class="text-xs font-bold bg-red-100/60 px-2 py-0.5 rounded text-red-600">Đã đặt</span>
+                                                    </template>
+                                                    <template x-if="!isBooked(slot.id)">
+                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(basePrice + parseFloat(slot.price_modifier))"></span>
+                                                    </template>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <template x-if="eveningSlots.length > 0">
+                                    <div class="mb-6">
+                                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> BUỔI TỐI</h3>
+                                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                            <template x-for="slot in eveningSlots" :key="slot.id">
+                                                <button @click="selectSlot(slot)"
+                                                        :disabled="isBooked(slot.id) || isPast(slot.start_time)"
+                                                        :class="[
+                                                            isBooked(slot.id) ? 'bg-red-50 border-red-200 cursor-not-allowed opacity-80 text-red-500' : 
+                                                            (isPast(slot.start_time) ? 'bg-slate-100 border-slate-200 cursor-not-allowed opacity-50 text-slate-500' :
+                                                            (selectedSlots.find(s => s.id === slot.id) ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-500/50 hover:text-emerald-500'))
+                                                        ]"
+                                                        class="flex items-center justify-between px-3 py-3 rounded-xl border transition-all duration-300 focus:outline-none group">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <i class="fa-regular fa-clock text-xs opacity-70"></i>
+                                                        <span class="font-medium text-sm" :class="(isBooked(slot.id) || isPast(slot.start_time)) ? 'line-through' : ''" x-text="formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time)"></span>
+                                                    </div>
+                                                    
+                                                    <template x-if="isBooked(slot.id)">
+                                                        <span class="text-xs font-bold bg-red-100/60 px-2 py-0.5 rounded text-red-600">Đã đặt</span>
+                                                    </template>
+                                                    <template x-if="!isBooked(slot.id)">
+                                                        <span class="text-sm font-bold" :class="selectedSlots.find(s => s.id === slot.id) ? 'text-white' : 'text-emerald-500'" x-text="formatCurrencyShort(basePrice + parseFloat(slot.price_modifier))"></span>
+                                                    </template>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
 
-                            <button onclick="scrollToCalendar()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 magnetic-btn relative overflow-hidden">
-                                <span class="relative z-10 btn-text">Chọn Giờ Đặt Sân</span>
+                    <!-- Sticky Summary (Grid 4/12) -->
+                    <div class="col-span-12 lg:col-span-4" data-aos="fade-left">
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-xl border border-slate-100 dark:border-slate-700 sticky top-28 w-full">
+                            <div class="flex items-end gap-1 mb-6 border-b border-slate-100 pb-4">
+                                <span class="text-3xl font-heading font-extrabold text-emerald-500">{{ number_format($field->base_price) }}đ</span>
+                                <span class="text-sm font-medium text-slate-500 mb-1">/giờ</span>
+                                <span class="text-xs text-slate-400 mb-1 ml-1">Giá từ</span>
+                            </div>
+
+                            <div class="space-y-4 mb-6">
+                                <div>
+                                    <div class="flex items-center gap-2 text-sm font-bold text-slate-700 mb-2">
+                                        <i class="fa-regular fa-calendar text-slate-400"></i> Ngày đã chọn
+                                    </div>
+                                    <div class="bg-slate-50 px-4 py-3 rounded-xl text-sm font-medium text-slate-800" x-text="formatDateDisplay(selectedDate) + ' (Thứ ' + (new Date(selectedDate).getDay() === 0 ? 'Chủ nhật' : new Date(selectedDate).getDay() + 1) + ')'"></div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 text-sm font-bold text-slate-700 mb-2">
+                                        <i class="fa-regular fa-clock text-slate-400"></i> Khung giờ đã chọn
+                                    </div>
+                                    <div class="bg-slate-50 px-4 py-3 rounded-xl min-h-[48px] flex flex-wrap gap-2 items-center">
+                                        <template x-if="selectedSlots.length === 0">
+                                            <span class="text-sm text-slate-400">Chưa chọn khung giờ nào</span>
+                                        </template>
+                                        <template x-for="slot in selectedSlots" :key="slot.id">
+                                            <span class="bg-white border border-slate-200 text-slate-700 px-2 py-1 rounded text-xs font-medium shadow-sm" x-text="formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time)"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mb-6 text-sm">
+                                <span class="text-slate-600 whitespace-nowrap" x-text="selectedSlots.length > 0 ? (formatTime(selectedSlots[0].start_time) + ' - ' + formatTime(selectedSlots[selectedSlots.length-1].end_time)) : ''"></span>
+                                <span class="font-bold text-slate-800 whitespace-nowrap" x-text="formatCurrency(originalPrice)"></span>
+                            </div>
+
+                            <div class="flex justify-between items-center mb-6 pt-4 border-t border-slate-100">
+                                <span class="text-slate-600 font-medium whitespace-nowrap">Tổng cộng</span>
+                                <span class="text-2xl font-extrabold text-slate-900 whitespace-nowrap" x-text="formatCurrency(originalPrice)"></span>
+                            </div>
+
+                            <button @click="goToCheckout()" :disabled="selectedSlots.length === 0" class="w-full bg-slate-300 text-slate-600 hover:bg-emerald-500 hover:text-white [&:not(:disabled)]:bg-emerald-500 [&:not(:disabled)]:text-white disabled:opacity-70 disabled:cursor-not-allowed font-bold py-4 rounded-xl shadow-md transition-all transform [&:not(:disabled)]:hover:-translate-y-1">
+                                Đặt sân ngay
                             </button>
+                            <p class="text-xs text-center text-slate-400 mt-4">Bạn chưa bị trừ tiền ở bước này</p>
                         </div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
-                        <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white mb-4">Về Sân Bóng Này</h3>
-                        <div class="prose dark:prose-invert prose-slate max-w-none text-sm leading-relaxed">
-                            <p>{{ $field->description ?? 'Đang cập nhật mô tả...' }}</p>
-                            <p>Sân được bảo trì thường xuyên, đảm bảo mặt cỏ luôn ở trạng thái tốt nhất. Phù hợp cho các giải đấu phong trào hoặc luyện tập hàng tuần.</p>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Booking Calendar (Grid 8/12) -->
-                <div class="col-span-12 lg:col-span-8" id="booking-section" data-aos="fade-up" x-data="bookingWizard()">
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-700 shadow-xl relative overflow-hidden">
-                        
-                        <!-- Confetti Canvas (Hidden by default) -->
-                        <canvas id="confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-50"></canvas>
-
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 border-b border-slate-100 pb-6">
-                            <div>
-                                <h2 class="text-2xl font-heading font-bold text-slate-900">Đặt Sân Bóng</h2>
-                                <p class="text-sm text-slate-500 mt-1">Chọn thời gian để giữ chỗ ngay!</p>
-                            </div>
-                            <!-- Thêm ảnh sân bóng vào mục đặt sân như yêu cầu -->
-                            <div class="w-24 h-16 sm:w-32 sm:h-24 rounded-lg overflow-hidden border-2 border-primary/20 shadow-sm flex-shrink-0">
-                                <img src="{{ $field->image ?? 'https://images.unsplash.com/photo-1518605363189-9854359db5a3?auto=format&fit=crop&w=300&q=80' }}" class="w-full h-full object-cover" alt="{{ $field->name }}">
-                            </div>
-                        </div>
-
-                        <!-- Wizard Step 1: Select Date -->
-                        <div class="mb-8">
-                            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4"><i class="fa-regular fa-calendar mr-2"></i> 1. Chọn ngày</h3>
-                            <div class="flex overflow-x-auto pb-4 gap-3 snap-x hide-scroll">
-                                <template x-for="(day, index) in dates" :key="index">
-                                    <button @click="selectDate(day.isoString)" 
-                                            :class="selectedDate === day.isoString ? 'bg-primary border-primary text-white shadow-md shadow-primary/30 transform scale-105' : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-primary/50'"
-                                            class="snap-start shrink-0 flex flex-col items-center justify-center w-20 h-24 rounded-2xl border transition-all duration-300 focus:outline-none">
-                                        <span class="text-xs font-medium uppercase mb-1" x-text="day.dayName"></span>
-                                        <span class="text-2xl font-bold font-heading leading-none mb-1" x-text="day.dayNum"></span>
-                                        <span class="text-xs opacity-80" x-text="'Thg ' + day.month"></span>
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Wizard Step 2: Select Time Slot -->
-                        <div class="mb-8" x-show="selectedDate" x-transition>
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider"><i class="fa-regular fa-clock mr-2"></i> 2. Chọn khung giờ</h3>
-                                <button @click="selectAllSlots()" class="text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm">
-                                    <i class="fa-solid fa-check-double mr-1"></i> Thuê Trọn Ngày
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                <template x-for="slot in timeSlots" :key="slot.id">
-                                    <button @click="selectSlot(slot)"
-                                            :disabled="isBooked(slot.id)"
-                                            :class="[
-                                                isBooked(slot.id) ? 'bg-red-50 border-red-200 cursor-not-allowed opacity-80' : 
-                                                (selectedSlots.find(s => s.id === slot.id) ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-500/50 hover:text-emerald-500')
-                                            ]"
-                                            class="flex flex-col items-center justify-center py-3 rounded-xl border transition-all duration-300 focus:outline-none relative overflow-hidden group">
-                                        <span class="font-bold text-lg leading-none mb-1" :class="isBooked(slot.id) ? 'text-red-400 line-through' : ''" x-text="formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time)"></span>
-                                        
-                                        <!-- Price Modifier Badge if any -->
-                                        <template x-if="slot.price_modifier > 0 && !isBooked(slot.id)">
-                                            <span class="text-[10px] font-bold bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full absolute top-1 right-1">+Giờ vàng</span>
-                                        </template>
-
-                                        <!-- Booked Status -->
-                                        <template x-if="isBooked(slot.id)">
-                                            <span class="text-xs font-bold mt-1 text-red-500 bg-red-100/60 px-2 py-0.5 rounded"><i class="fa-solid fa-lock text-[10px] mr-1"></i> Đã đặt</span>
-                                        </template>
-                                        <template x-if="!isBooked(slot.id)">
-                                            <span class="text-xs font-medium mt-1 opacity-80" x-text="formatCurrency(basePrice + parseFloat(slot.price_modifier))"></span>
-                                        </template>
-                                    </button>
-                                </template>
-                            </div>
-                            <template x-if="timeSlots.length === 0">
-                                <div class="text-center py-8 text-slate-500">Không có khung giờ nào được cấu hình cho sân này.</div>
-                            </template>
-                        </div>
-
-                        <!-- Wizard Step 3: Checkout -->
-                        <div x-show="selectedSlots.length > 0" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="p-6 bg-slate-50 rounded-3xl border border-primary/20 shadow-inner">
-                            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4"><i class="fa-solid fa-check-to-slot mr-2"></i> 3. Xác nhận & Thanh toán</h3>
-                            
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                <div>
-                                    <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-1">Ngày</p>
-                                    <p class="font-medium text-slate-800" x-text="formatDateDisplay(selectedDate)"></p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-1">Bắt đầu</p>
-                                    <p class="font-medium text-slate-800" x-text="selectedSlots.length > 0 ? formatTime(selectedSlots[0].start_time) : '--'"></p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-1">Kết thúc</p>
-                                    <p class="font-medium text-slate-800" x-text="selectedSlots.length > 0 ? formatTime(selectedSlots[selectedSlots.length - 1].end_time) : '--'"></p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-1">Tổng tiền</p>
-                                    <p class="font-bold text-slate-400 text-sm line-through" x-show="discountAmount > 0" x-text="formatCurrency(originalPrice)"></p>
-                                    <p class="font-bold text-primary text-lg" x-text="formatCurrency(finalPrice)"></p>
-                                </div>
-                            </div>
-                            
-                            <!-- Voucher Section -->
-                            <div class="mb-6 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex gap-2">
-                                <div class="flex-1 relative">
-                                    <i class="fa-solid fa-ticket absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" x-model="voucherInput" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary uppercase font-bold text-slate-700 dark:text-slate-200" placeholder="Nhập mã khuyến mãi">
-                                </div>
-                                <button @click="applyVoucher()" :disabled="isProcessingVoucher || !voucherInput" class="bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-bold transition-colors whitespace-nowrap">
-                                    <span x-show="!isProcessingVoucher">Áp dụng</span>
-                                    <span x-show="isProcessingVoucher"><i class="fa-solid fa-spinner fa-spin"></i></span>
-                                </button>
-                            </div>
-                            <div x-show="voucherMessage" class="text-sm mb-4 font-bold" :class="voucherSuccess ? 'text-emerald-500' : 'text-red-500'" x-html="voucherMessage"></div>
-                            
-                            @auth
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <button @click="checkout('vnpay')" :disabled="isProcessing" class="flex-1 bg-primary hover:bg-secondary text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-primary/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0">
-                                    <span x-show="!isProcessing" class="flex items-center"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png" class="h-5 w-auto object-contain inline-block mr-2 bg-white rounded-sm p-0.5" alt="VNPay"> Thanh toán VNPay</span>
-                                    <span x-show="isProcessing"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...</span>
-                                </button>
-                                <button @click="checkout('cash')" :disabled="isProcessing" class="flex-1 bg-[#10b981] hover:bg-[#059669] text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-[#10b981]/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0">
-                                    <span x-show="!isProcessing" class="flex items-center"><i class="fa-solid fa-money-bill-wave text-xl mr-2"></i> Thanh toán Tiền mặt</span>
-                                    <span x-show="isProcessing"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...</span>
-                                </button>
-                            </div>
-                            @endauth
-
-                            @guest
-                            <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl text-center">
-                                <p class="text-blue-700 font-medium mb-3">Bạn cần đăng nhập để tiến hành đặt sân</p>
-                                <a href="{{ route('login') }}" class="inline-block bg-primary hover:bg-secondary text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition-colors">
-                                    Đăng nhập ngay
-                                </a>
-                            </div>
-                            @endguest
-                        </div>
-
                     </div>
                 </div>
-
             </div>
+
+            <!-- STEP 2: Checkout -->
+            <div x-show="step === 2" x-transition.opacity x-cloak>
+                <div class="mb-6">
+                    <button @click="step = 1" class="text-slate-500 hover:text-slate-800 font-medium flex items-center gap-2 transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i> Quay lại
+                    </button>
+                    <h2 class="text-3xl font-heading font-extrabold text-slate-900 mt-4">Thanh toán đặt sân</h2>
+                </div>
+
+                <div class="grid grid-cols-12 gap-8">
+                    <!-- Left: Details -->
+                    <div class="col-span-12 lg:col-span-8 space-y-6">
+                        <!-- Thông tin đặt sân -->
+                        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-800 mb-4">Thông tin đặt sân</h3>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="w-full sm:w-1/3 h-32 rounded-xl overflow-hidden shadow-sm">
+                                    <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}" class="w-full h-full object-cover" alt="{{ $field->name }}">
+                                </div>
+                                <div class="flex-1 space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">{{ $field->name }}</h4>
+                                    <p class="text-sm text-slate-500"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i> Cơ sở Trung Tâm, Hà Nội</p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <span class="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                                            <i class="fa-regular fa-calendar mr-1"></i> <span x-text="formatDateDisplay(selectedDate)"></span>
+                                        </span>
+                                        <span class="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                                            <i class="fa-regular fa-clock mr-1"></i> <span x-text="selectedSlots.length > 0 ? (formatTime(selectedSlots[0].start_time) + ' - ' + formatTime(selectedSlots[selectedSlots.length-1].end_time)) : ''"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin người đặt -->
+                        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-800 mb-4">Thông tin người đặt</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-1">Họ và tên <span class="text-red-500">*</span></label>
+                                    <input type="text" x-model="customerName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Nhập họ và tên">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                                    <input type="text" x-model="customerPhone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Nhập số điện thoại">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-1">Ghi chú</label>
+                                    <textarea x-model="bookingNotes" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Ghi chú thêm (không bắt buộc)"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phương thức thanh toán -->
+                        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-800 mb-4">Phương thức thanh toán</h3>
+                            <div class="space-y-3">
+                                <label class="flex items-center gap-3 p-4 border-2 border-emerald-500 bg-emerald-50/50 rounded-xl cursor-pointer shadow-sm">
+                                    <input type="radio" checked class="text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png" class="h-6 w-auto object-contain bg-white rounded border border-slate-200 p-0.5" alt="VNPay">
+                                    <span class="font-bold text-slate-800">Thanh toán VNPay (Chuyển khoản)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Summary -->
+                    <div class="col-span-12 lg:col-span-4">
+                        <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 sticky top-28 w-full">
+                            <h3 class="text-lg font-bold text-slate-800 mb-4 pb-4 border-b border-slate-100">Tóm tắt đơn hàng</h3>
+                            
+                            <div class="flex items-start gap-3 mb-6">
+                                <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}" class="w-16 h-12 rounded object-cover shadow-sm">
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800 leading-tight">{{ $field->name }}</h4>
+                                    <p class="text-xs text-slate-500">Sân {{ $field->fieldType->name }}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center mb-6 text-sm">
+                                <span class="text-slate-600" x-text="selectedSlots.length > 0 ? (formatTime(selectedSlots[0].start_time) + ' - ' + formatTime(selectedSlots[selectedSlots.length-1].end_time)) : ''"></span>
+                                <span class="font-bold text-slate-800" x-text="formatCurrency(originalPrice)"></span>
+                            </div>
+
+                            <!-- Voucher -->
+                            <div class="mb-6">
+                                <p class="text-sm font-bold text-slate-700 mb-2"><i class="fa-solid fa-ticket text-emerald-500 mr-1"></i> Mã giảm giá</p>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="voucherInput" class="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm uppercase focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" placeholder="NHẬP MÃ GIẢM GIÁ">
+                                    <button @click="applyVoucher()" :disabled="isProcessingVoucher || !voucherInput" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors">
+                                        <span x-show="!isProcessingVoucher">Áp dụng</span>
+                                        <span x-show="isProcessingVoucher"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
+                                <div x-show="voucherMessage" class="text-xs mt-2 font-bold" :class="voucherSuccess ? 'text-emerald-500' : 'text-red-500'" x-html="voucherMessage"></div>
+                            </div>
+
+                            <div class="space-y-3 mb-6 pt-4 border-t border-slate-100">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Tạm tính</span>
+                                    <span class="font-bold text-slate-800" x-text="formatCurrency(originalPrice)"></span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Phí dịch vụ</span>
+                                    <span class="font-medium text-emerald-500">Miễn phí</span>
+                                </div>
+                                <div x-show="discountAmount > 0" class="flex justify-between text-sm text-emerald-600">
+                                    <span>Giảm giá</span>
+                                    <span class="font-bold" x-text="'-' + formatCurrency(discountAmount)"></span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center mb-6 pt-4 border-t border-slate-100">
+                                <span class="text-slate-800 font-bold">Tổng cộng</span>
+                                <span class="text-2xl font-extrabold text-emerald-600" x-text="formatCurrency(finalPrice)"></span>
+                            </div>
+
+                            @auth
+                            <button @click="checkout('vnpay')" :disabled="isProcessing || !customerName || !customerPhone" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                                <span x-show="!isProcessing">Xác nhận thanh toán</span>
+                                <span x-show="isProcessing"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...</span>
+                            </button>
+                            @endauth
+                            @guest
+                            <a href="{{ route('login') }}" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-center font-bold py-4 rounded-xl shadow-md transition-colors">
+                                Đăng nhập để thanh toán
+                            </a>
+                            @endguest
+                            
+                            <p class="text-[11px] text-center text-slate-400 mt-4 leading-relaxed">
+                                Bằng việc đặt sân, bạn đồng ý với <a href="#" class="text-emerald-500 underline">Điều khoản dịch vụ</a> của chúng tôi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 @endsection
@@ -253,6 +401,7 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('bookingWizard', () => ({
+            step: 1,
             basePrice: {{ $field->base_price }},
             timeSlots: @json($timeSlots),
             bookedSlotsByDate: @json($bookedSlotsByDate),
@@ -261,13 +410,6 @@
             dates: [],
             selectedDate: null,
             selectedSlots: [],
-            
-            voucherInput: '',
-            appliedVoucher: null,
-            voucherMessage: '',
-            voucherSuccess: false,
-            isProcessingVoucher: false,
-            isProcessing: false,
             
             init() {
                 // Generate next 14 days
@@ -301,7 +443,7 @@
             },
             
             selectSlot(slot) {
-                if(this.isBooked(slot.id)) return;
+                if(this.isBooked(slot.id) || this.isPast(slot.start_time)) return;
                 
                 const index = this.selectedSlots.findIndex(s => s.id === slot.id);
                 if (index > -1) {
@@ -315,21 +457,27 @@
                 this.resetVoucher();
             },
             
-            selectAllSlots() {
-                this.selectedSlots = [];
-                this.timeSlots.forEach(slot => {
-                    if (!this.isBooked(slot.id)) {
-                        this.selectedSlots.push(slot);
-                    }
-                });
-                this.selectedSlots.sort((a, b) => a.start_time.localeCompare(b.start_time));
-                this.resetVoucher();
-            },
-            
             isBooked(slotId) {
                 if(!this.selectedDate) return false;
                 const bookedIds = this.bookedSlotsByDate[this.selectedDate] || [];
                 return bookedIds.includes(slotId);
+            },
+            
+            isPast(timeStr) {
+                if(!this.selectedDate || !timeStr) return false;
+                
+                const today = new Date();
+                const todayIso = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+                
+                if (this.selectedDate < todayIso) return true;
+                if (this.selectedDate > todayIso) return false;
+                
+                // If today, compare time
+                const [hours, minutes] = timeStr.split(':');
+                const slotTime = new Date();
+                slotTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                
+                return slotTime < today;
             },
             
             formatTime(timeStr) {
@@ -347,6 +495,30 @@
                 return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
             },
             
+            formatCurrencyShort(amount) {
+                return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+            },
+
+            get morningSlots() {
+                return this.timeSlots.filter(s => parseInt(s.start_time.substring(0, 2)) < 12);
+            },
+            get afternoonSlots() {
+                return this.timeSlots.filter(s => {
+                    const hour = parseInt(s.start_time.substring(0, 2));
+                    return hour >= 12 && hour < 18;
+                });
+            },
+            get eveningSlots() {
+                return this.timeSlots.filter(s => parseInt(s.start_time.substring(0, 2)) >= 18);
+            },
+            
+            goToCheckout() {
+                if (this.selectedSlots.length > 0) {
+                    const slotIds = this.selectedSlots.map(s => s.id).join(',');
+                    window.location.href = `{{ route('checkout') }}?field_id={{ $field->id }}&date=${this.selectedDate}&slots=${slotIds}`;
+                }
+            },
+            
             get originalPrice() {
                 if(this.selectedSlots.length === 0) return 0;
                 let total = 0;
@@ -354,144 +526,6 @@
                     total += this.basePrice + parseFloat(slot.price_modifier);
                 });
                 return total;
-            },
-            
-            get finalPrice() {
-                let price = this.originalPrice - this.discountAmount;
-                return price < 0 ? 0 : price;
-            },
-            
-            get discountAmount() {
-                if(!this.appliedVoucher) return 0;
-                if(this.appliedVoucher.discount_percent) {
-                    return this.originalPrice * (this.appliedVoucher.discount_percent / 100);
-                } else if(this.appliedVoucher.discount_amount) {
-                    return parseFloat(this.appliedVoucher.discount_amount);
-                }
-                return 0;
-            },
-            
-            resetVoucher() {
-                this.appliedVoucher = null;
-                this.voucherInput = '';
-                this.voucherMessage = '';
-                this.voucherSuccess = false;
-            },
-            
-            applyVoucher() {
-                if(!this.voucherInput) return;
-                
-                this.isProcessingVoucher = true;
-                this.voucherMessage = '';
-                
-                fetch('{{ route("voucher.check") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ code: this.voucherInput })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    this.isProcessingVoucher = false;
-                    
-                    if (data.success) {
-                        this.appliedVoucher = data.voucher;
-                        this.voucherSuccess = true;
-                        this.voucherMessage = `<i class="fa-solid fa-check-circle"></i> Áp dụng thành công! Đã giảm ${this.formatCurrency(this.discountAmount)}`;
-                    } else {
-                        this.resetVoucher();
-                        this.voucherSuccess = false;
-                        this.voucherMessage = `<i class="fa-solid fa-circle-exclamation"></i> ${data.message}`;
-                    }
-                })
-                .catch(err => {
-                    this.isProcessingVoucher = false;
-                    this.voucherSuccess = false;
-                    this.voucherMessage = `<i class="fa-solid fa-circle-exclamation"></i> Có lỗi xảy ra.`;
-                });
-            },
-            
-            checkout(paymentMethod) {
-                if(!this.selectedDate || this.selectedSlots.length === 0) return;
-                
-                this.isProcessing = true;
-                this.paymentMethod = paymentMethod;
-                
-                Swal.fire({
-                    title: 'Đang tạo đơn hàng...',
-                    html: 'Vui lòng chờ trong giây lát',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading()
-                    }
-                });
-                
-                // Create booking with status pending
-                fetch('{{ route("book") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        field_id: this.fieldId,
-                        booking_date: this.selectedDate,
-                        slots: this.selectedSlots.map(s => ({ start_time: s.start_time, end_time: s.end_time })),
-                        total_amount: this.finalPrice,
-                        payment_method: this.paymentMethod,
-                        voucher_code: this.appliedVoucher ? this.appliedVoucher.code : null,
-                        booking_code: '' // Let backend generate it
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    this.isProcessing = false;
-                    if (data.success) {
-                        if (data.redirect_url) {
-                            Swal.fire({
-                                title: 'Đang chuyển hướng...',
-                                text: 'Vui lòng chờ trong giây lát',
-                                icon: 'info',
-                                showConfirmButton: false,
-                                timer: 2000
-                            });
-                            window.location.href = data.redirect_url;
-                        } else {
-                            Swal.close();
-                            if (paymentMethod === 'cash') {
-                                // Show success for cash
-                                if (typeof triggerConfetti === 'function') triggerConfetti();
-                                else window.dispatchEvent(new CustomEvent('trigger-confetti'));
-                                
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Đặt sân thành công!',
-                                    html: `Mã đơn của bạn là: <b>${data.booking_code}</b><br>Vui lòng đến sân đúng giờ và thanh toán tại quầy.`,
-                                    showConfirmButton: true,
-                                    confirmButtonText: 'Đóng'
-                                }).then(() => {
-                                    window.location.reload();
-                                });
-                            } else {
-                                // Open QR Modal for other methods (if any)
-                                this.$dispatch('open-payment-modal', {
-                                    method: paymentMethod,
-                                    amount: this.finalPrice,
-                                    code: data.booking_code
-                                });
-                            }
-                        }
-                    } else {
-                        Swal.close();
-                        Swal.fire('Lỗi!', data.message, 'error');
-                    }
-                })
-                .catch(err => {
-                    this.isProcessing = false;
-                    Swal.fire('Lỗi!', 'Có lỗi xảy ra, vui lòng thử lại.', 'error');
-                });
             },
             
             triggerConfetti() {

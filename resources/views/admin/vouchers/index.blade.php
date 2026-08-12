@@ -114,7 +114,12 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Mã Voucher (Code)</label>
-                    <input type="text" name="code" required class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary uppercase" placeholder="VD: SUMMER2026">
+                    <div class="relative">
+                        <input type="text" id="voucher_code_input" name="code" required class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 pr-24 text-sm focus:ring-2 focus:ring-primary uppercase" placeholder="VD: SUMMER2026">
+                        <button type="button" onclick="document.getElementById('voucher_code_input').value = 'SALE' + Math.random().toString(36).substring(2, 8).toUpperCase()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            Tạo tự động
+                        </button>
+                    </div>
                 </div>
                 
                 <div>

@@ -7,7 +7,7 @@
     <div class="relative w-full h-[85vh] flex items-center justify-center bg-white">
         <!-- Bright Background Image -->
         <div class="absolute inset-0 w-full h-full z-0 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1518605363189-9854359db5a3?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover opacity-20 scale-105" alt="Background" />
+            <img src="https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=2070&h=1000&dpr=1" class="w-full h-full object-cover opacity-20 scale-105" alt="Background" />
             <div class="absolute inset-0 bg-gradient-to-b from-white/90 via-white/70 to-bg-light"></div>
         </div>
 
@@ -132,7 +132,7 @@
                 <!-- Field Card -->
                 <div class="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 relative" data-aos="fade-up" data-aos-delay="{{ ($index + 1) * 100 }}">
                     <div class="relative h-64 overflow-hidden">
-                        <img src="{{ $field->image ?? 'https://images.unsplash.com/photo-1518605363189-9854359db5a3?auto=format&fit=crop&w=800&q=80' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $field->name }}">
+                        <img src="{{ $field->image ?? 'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $field->name }}">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80"></div>
                         <div class="absolute top-4 right-4 {{ $field->status == 'available' ? 'bg-emerald-500' : 'bg-red-500' }} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                             @if($field->status == 'available')

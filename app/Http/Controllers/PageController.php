@@ -55,4 +55,24 @@ class PageController extends Controller
 
         return view('pages.field_detail', compact('field', 'timeSlots', 'bookedSlotsByDate'));
     }
+
+    public function checkout(Request $request)
+    {
+        $fieldId = $request->query('field_id');
+        $date = $request->query('date');
+        $slotIds = array_filter(explode(',', $request->query('slots', '')));
+        
+        if (!$fieldId || !$date || empty($slotIds)) {
+            return redirect()->route('home')->with('error', 'Thông tin đặt sân không hợp lệ.');
+        }
+
+        $field = \App\Models\Field::with('fieldType')->findOrFail($fieldId);
+        $timeSlots = \App\Models\TimeSlot::whereIn('id', $slotIds)->orderBy('start_time')->get();
+        
+        if ($timeSlots->isEmpty()) {
+            return redirect()->route('home')->with('error', 'Không tìm thấy khung giờ nào.');
+        }
+        
+        return view('pages.checkout', compact('field', 'date', 'timeSlots'));
+    }
 }
