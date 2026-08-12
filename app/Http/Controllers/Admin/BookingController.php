@@ -302,6 +302,10 @@ class BookingController extends Controller
             'status' => 'required|in:pending,confirmed,in_progress,completed,cancelled'
         ]);
 
+        \Illuminate\Support\Facades\DB::beginTransaction();
+
+        try {
+
         if ($request->status === 'in_progress' && $booking->status !== 'in_progress') {
             foreach ($booking->details as $detail) {
                 $detail->update(['actual_start_time' => now()]);
@@ -328,12 +332,22 @@ class BookingController extends Controller
             }
             
             // Task 11: Tính phí ngoài giờ (Overtime Fee) nếu Admin có nhập
-            $overtimeFee = $request->input('overtime_fee', 0);
+            $overtimeFee = (int)$request->input('overtime_fee', 0);
             if ($overtimeFee > 0) {
                 $booking->update([
                     'total_amount' => $booking->total_amount + $overtimeFee
                 ]);
                 $booking->details()->first()->update(['overtime_fee' => $overtimeFee]);
+                
+                // Thu khoản overtime này luôn dưới dạng cash tại quầy để tránh bị báo thiếu tiền
+                \App\Models\Payment::create([
+                    'booking_id' => $booking->id,
+                    'amount' => $overtimeFee,
+                    'payment_method' => 'cash', // Admin thu POS/Tiền mặt
+                    'status' => 'success',
+                    'transaction_id' => 'POS_OT_' . time() . '_' . $booking->id,
+                    'paid_at' => now(),
+                ]);
             }
             
             // Task 5: Chặn chuyển completed nếu chưa thanh toán đủ
@@ -344,17 +358,23 @@ class BookingController extends Controller
             $unpaidAmount = $booking->total_amount - $paidAmount;
             
             if ($unpaidAmount > 0) {
+                \Illuminate\Support\Facades\DB::rollBack();
                 return back()->with('error', 'Không thể hoàn thành đơn! Khách hàng còn nợ ' . number_format($unpaidAmount) . 'đ. Vui lòng yêu cầu khách thanh toán đủ trước.');
             }
 
-            // Task 10: Gamification - Nâng hạng (Level) cho user
+            // Task 10: Gamification - Nâng hạng (Level) cho user động từ bảng levels
             if ($booking->user && $booking->user->role === 'customer') {
                 $totalPoints = $booking->user->points;
-                // Giả sử: Đồng = 0, Bạc = 1000, Vàng = 5000, Kim Cương = 10000
-                $newLevelId = 1; // Default
-                if ($totalPoints >= 10000) $newLevelId = 4;
-                elseif ($totalPoints >= 5000) $newLevelId = 3;
-                elseif ($totalPoints >= 1000) $newLevelId = 2;
+                
+                $levels = \App\Models\Level::orderBy('required_points', 'desc')->get();
+                $newLevelId = $booking->user->level_id; // Default keep current
+                
+                foreach ($levels as $level) {
+                    if ($totalPoints >= $level->required_points) {
+                        $newLevelId = $level->id;
+                        break;
+                    }
+                }
 
                 if ($booking->user->level_id !== $newLevelId) {
                     $booking->user->update(['level_id' => $newLevelId]);
@@ -364,16 +384,16 @@ class BookingController extends Controller
         
         // Tình huống 6: Hoàn tiền / Bảo lưu cọc nếu Hủy
         if ($request->status === 'cancelled' && $booking->status !== 'cancelled') {
-            $payment = \App\Models\Payment::where('booking_id', $booking->id)->where('status', 'success')->first();
+            $paidAmount = \App\Models\Payment::where('booking_id', $booking->id)->where('status', 'success')->sum('amount');
             
-            if ($payment && $booking->user) {
+            if ($paidAmount > 0 && $booking->user) {
                 // Bảo lưu cọc (Hoàn tiền vào ví dư)
-                $booking->user->wallet_balance += $booking->total_amount;
+                $booking->user->wallet_balance += $paidAmount;
                 $booking->user->save();
                 
                 \App\Models\WalletTransaction::create([
                     'user_id' => $booking->user_id,
-                    'amount' => $booking->total_amount,
+                    'amount' => $paidAmount,
                     'type' => 'refund',
                     'description' => 'Hoàn tiền hủy đơn đặt sân ' . $booking->booking_code
                 ]);
@@ -396,6 +416,12 @@ class BookingController extends Controller
             }
         }
 
+        \Illuminate\Support\Facades\DB::commit();
         return back()->with('success', 'Đã cập nhật trạng thái đơn đặt sân!');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
     }
 }

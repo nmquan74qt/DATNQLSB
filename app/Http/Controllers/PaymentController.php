@@ -42,6 +42,8 @@ class PaymentController extends Controller
                 // Task 4: Đối chiếu số dư (VNPay amount is in VND * 100)
                 $returnedAmount = $request->vnp_Amount / 100;
                 if ($returnedAmount != $booking->total_amount) {
+                    \Illuminate\Support\Facades\Log::warning("Nghi ngờ gian lận VNPay: Đơn {$booking->booking_code}, cần: {$booking->total_amount}, thực nhận: {$returnedAmount}");
+                    $booking->update(['status' => 'cancelled']);
                     return redirect()->route('fields.index')->with('error', 'Giao dịch VNPay thất bại do số tiền không khớp (Nghi ngờ gian lận)!');
                 }
 
@@ -111,6 +113,8 @@ class PaymentController extends Controller
                 // Task 4: Đối chiếu số dư
                 $returnedAmount = $request->amount ?? $booking->total_amount; // Fallback if real momo doesn't pass it back directly in this field
                 if (isset($request->amount) && $request->amount != $booking->total_amount) {
+                    \Illuminate\Support\Facades\Log::warning("Nghi ngờ gian lận MoMo: Đơn {$booking->booking_code}, cần: {$booking->total_amount}, thực nhận: {$request->amount}");
+                    $booking->update(['status' => 'cancelled']);
                     return redirect()->route('fields.index')->with('error', 'Giao dịch MoMo thất bại do số tiền không khớp (Nghi ngờ gian lận)!');
                 }
 

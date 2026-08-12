@@ -195,27 +195,12 @@ class BookingController extends Controller
                 ]);
             }
 
-            // Task 3: Chặn Bypass thanh toán
-            // Bất kỳ phương thức nào không phải vnpay/momo đều bị từ chối
+            // Fallback (thực tế không chạy đến đây vì đã bị chặn bởi validator và return ở trên)
             \Illuminate\Support\Facades\DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Phương thức thanh toán không hợp lệ!'
             ], 400);
-
-            if (auth()->check()) {
-                auth()->user()->notify(new SystemNotification(
-                    '⚽ Đặt sân thành công',
-                    "Đơn đặt sân {$booking->booking_code} đã được tạo thành công! Vui lòng chờ xác nhận.",
-                    'success'
-                ));
-            }
-
-            return response()->json([
-                'success' => true, 
-                'message' => 'Đặt sân thành công!',
-                'booking_code' => $booking->booking_code
-            ]);
         });
     }
 
