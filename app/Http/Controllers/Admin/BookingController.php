@@ -88,6 +88,9 @@ class BookingController extends Controller
             if (!$field) {
                 return back()->with('error', 'Sân không tồn tại!');
             }
+            if (!$field->is_active || $field->status === 'maintenance') {
+                return back()->with('error', 'Sân hiện đang bảo trì hoặc ngừng hoạt động, không thể đặt!');
+            }
 
             $timeSlot = \App\Models\TimeSlot::find($request->time_slot_id);
             
@@ -168,7 +171,7 @@ class BookingController extends Controller
                 'booking_id' => $booking->id,
                 'user_id' => $booking->user_id,
                 'amount' => $calculatedTotal,
-                'payment_method' => 'pos', // Admin thu tại quầy
+                'payment_method' => 'cash', // Admin thu tại quầy
                 'status' => 'success',
                 'transaction_id' => 'POS_' . time() . '_' . $booking->id,
                 'paid_at' => now(),
@@ -190,6 +193,10 @@ class BookingController extends Controller
 
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
             $field = \App\Models\Field::where('id', $request->field_id)->lockForUpdate()->first();
+            if (!$field || !$field->is_active || $field->status === 'maintenance') {
+                return back()->with('error', 'Sân hiện đang bảo trì hoặc ngừng hoạt động, không thể đặt!');
+            }
+            
             $timeSlot = \App\Models\TimeSlot::find($request->time_slot_id);
             
             $startDate = \Carbon\Carbon::parse($request->start_date);
@@ -281,7 +288,7 @@ class BookingController extends Controller
                     'booking_id' => $booking->id,
                     'user_id' => $booking->user_id,
                     'amount' => $calculatedTotal,
-                    'payment_method' => 'pos',
+                    'payment_method' => 'cash',
                     'status' => 'success',
                     'transaction_id' => 'POS_' . time() . '_' . $booking->id,
                     'paid_at' => now(),

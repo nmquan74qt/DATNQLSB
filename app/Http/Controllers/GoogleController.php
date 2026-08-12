@@ -25,6 +25,9 @@ class GoogleController extends Controller
             $user = User::where('google_id', $googleUser->id)->first();
             
             if ($user) {
+                if (in_array($user->status, ['banned', 'inactive'])) {
+                    return redirect()->route('login')->with('error', 'Tài khoản của bạn đã bị vô hiệu hóa hoặc cấm truy cập.');
+                }
                 // Đăng nhập
                 Auth::login($user);
                 return redirect()->intended(route('home'))->with('success', 'Đăng nhập thành công!');
@@ -33,6 +36,9 @@ class GoogleController extends Controller
             // Nếu chưa có google_id, tìm qua email
             $user = User::where('email', $googleUser->email)->first();
             if ($user) {
+                if (in_array($user->status, ['banned', 'inactive'])) {
+                    return redirect()->route('login')->with('error', 'Tài khoản của bạn đã bị vô hiệu hóa hoặc cấm truy cập.');
+                }
                 // Liên kết tài khoản
                 $user->update([
                     'google_id' => $googleUser->id,

@@ -22,6 +22,14 @@ class RoleMiddleware
 
         $user = Auth::user();
 
+        // Tự động logout phiên cũ nếu tài khoản bị khóa/đình chỉ
+        if (in_array($user->status, ['banned', 'inactive'])) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect('/login')->with('error', 'Tài khoản của bạn đã bị vô hiệu hóa hoặc cấm truy cập.');
+        }
+
         // Nếu user có một trong các role yêu cầu
         if (!in_array($user->role, $roles)) {
             // Nếu là admin thì được phép truy cập mọi role staff

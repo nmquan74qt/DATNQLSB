@@ -23,6 +23,10 @@ class BookingController extends Controller
             'total_amount' => 'required|numeric'
         ]);
 
+        if (auth()->check() && in_array(auth()->user()->status, ['banned', 'inactive'])) {
+            return response()->json(['success' => false, 'message' => 'Tài khoản của bạn đã bị vô hiệu hóa hoặc cấm truy cập.'], 403);
+        }
+
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
             // Khóa (lock) record của sân này để chống trùng lịch (Race Condition)
             $field = \App\Models\Field::where('id', $request->field_id)->lockForUpdate()->first();
@@ -102,6 +106,7 @@ class BookingController extends Controller
             $notes = 'Đang chờ thanh toán qua ' . $request->payment_method;
             if ($request->voucher_code) {
                 $voucher = \App\Models\Voucher::where('code', strtoupper($request->voucher_code))
+                    ->lockForUpdate()
                     ->where('is_active', true)
                     ->where('used_count', '<', \Illuminate\Support\Facades\DB::raw('max_uses'))
                     ->where(function($q) {
