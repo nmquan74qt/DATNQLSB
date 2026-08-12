@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Services\Payment\VNPayService;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\SystemNotification;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvoiceMail;
 
 class PaymentController extends Controller
 {
@@ -37,15 +39,37 @@ class PaymentController extends Controller
 
         if ($result['success']) {
             if ($booking) {
-                $booking->update(['status' => 'confirmed']); // Hoặc 'completed' tùy luồng, 'confirmed' hợp lý hơn cho đặt trước
+                // Task 4: Đối chiếu số dư (VNPay amount is in VND * 100)
+                $returnedAmount = $request->vnp_Amount / 100;
+                if ($returnedAmount != $booking->total_amount) {
+                    return redirect()->route('fields.index')->with('error', 'Giao dịch VNPay thất bại do số tiền không khớp (Nghi ngờ gian lận)!');
+                }
+
+                // Task 4: Chống double-payment
+                $existingPayment = \App\Models\Payment::where('booking_id', $booking->id)
+                                    ->where('status', 'success')
+                                    ->first();
                 
-                \App\Models\Payment::create([
-                    'booking_id' => $booking->id,
-                    'transaction_id' => $request->vnp_TransactionNo ?? 'VNP' . time(),
-                    'amount' => $request->vnp_Amount / 100, // VNPay sends amount * 100
-                    'payment_method' => 'vnpay',
-                    'status' => 'success'
-                ]);
+                if (!$existingPayment) {
+                    $booking->update(['status' => 'confirmed']); // Hoặc 'completed' tùy luồng, 'confirmed' hợp lý hơn cho đặt trước
+                    
+                    $newPayment = \App\Models\Payment::create([
+                        'booking_id' => $booking->id,
+                        'transaction_id' => $request->vnp_TransactionNo ?? 'VNP' . time(),
+                        'amount' => $returnedAmount,
+                        'payment_method' => 'vnpay',
+                        'status' => 'success'
+                    ]);
+                    
+                    // Gửi Email Hóa Đơn
+                    if ($booking->user && $booking->user->email) {
+                        try {
+                            Mail::to($booking->user->email)->send(new InvoiceMail($booking, $newPayment));
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error('Error sending invoice email: ' . $e->getMessage());
+                        }
+                    }
+                }
             }
             if (auth()->check()) {
                 auth()->user()->notify(new SystemNotification(
@@ -84,15 +108,37 @@ class PaymentController extends Controller
 
         if ($result['success']) {
             if ($booking) {
-                $booking->update(['status' => 'confirmed']);
-                
-                \App\Models\Payment::create([
-                    'booking_id' => $booking->id,
-                    'transaction_id' => $result['transId'] ?? 'MOMO' . time(),
-                    'amount' => $booking->total_amount,
-                    'payment_method' => 'momo',
-                    'status' => 'success'
-                ]);
+                // Task 4: Đối chiếu số dư
+                $returnedAmount = $request->amount ?? $booking->total_amount; // Fallback if real momo doesn't pass it back directly in this field
+                if (isset($request->amount) && $request->amount != $booking->total_amount) {
+                    return redirect()->route('fields.index')->with('error', 'Giao dịch MoMo thất bại do số tiền không khớp (Nghi ngờ gian lận)!');
+                }
+
+                // Task 4: Chống double-payment
+                $existingPayment = \App\Models\Payment::where('booking_id', $booking->id)
+                                    ->where('status', 'success')
+                                    ->first();
+
+                if (!$existingPayment) {
+                    $booking->update(['status' => 'confirmed']);
+                    
+                    $newPayment = \App\Models\Payment::create([
+                        'booking_id' => $booking->id,
+                        'transaction_id' => $result['transId'] ?? 'MOMO' . time(),
+                        'amount' => $booking->total_amount,
+                        'payment_method' => 'momo',
+                        'status' => 'success'
+                    ]);
+                    
+                    // Gửi Email Hóa Đơn
+                    if ($booking->user && $booking->user->email) {
+                        try {
+                            Mail::to($booking->user->email)->send(new InvoiceMail($booking, $newPayment));
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error('Error sending invoice email: ' . $e->getMessage());
+                        }
+                    }
+                }
             }
             if (auth()->check()) {
                 auth()->user()->notify(new SystemNotification(

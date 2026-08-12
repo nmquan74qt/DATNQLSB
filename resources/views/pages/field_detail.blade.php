@@ -90,6 +90,56 @@
                             </div>
                         </div>
 
+                        <!-- Reviews Section -->
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white mb-4">Đánh giá từ khách hàng</h3>
+                            
+                            @php
+                                $reviews = \App\Models\Review::where('field_id', $field->id)->where('is_approved', true)->latest()->get();
+                                $avgRating = $reviews->avg('rating') ?? 0;
+                            @endphp
+
+                            <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-700">
+                                <div class="text-4xl font-extrabold text-warning">{{ number_format($avgRating, 1) }}</div>
+                                <div>
+                                    <div class="flex text-warning text-lg">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="fa-{{ $i <= round($avgRating) ? 'solid' : 'regular' }} fa-star"></i>
+                                        @endfor
+                                    </div>
+                                    <div class="text-sm text-slate-500 mt-1">{{ $reviews->count() }} lượt đánh giá</div>
+                                </div>
+                            </div>
+
+                            @if($reviews->isEmpty())
+                                <p class="text-slate-500 text-sm text-center py-4">Chưa có đánh giá nào cho sân này.</p>
+                            @else
+                                <div class="space-y-6">
+                                    @foreach($reviews as $review)
+                                    <div class="flex gap-4">
+                                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-500 shrink-0">
+                                            {{ substr($review->user->name ?? 'K', 0, 1) }}
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <h4 class="font-bold text-slate-800 dark:text-white">{{ $review->user->name ?? 'Khách hàng' }}</h4>
+                                                <span class="text-xs text-slate-400">&bull; {{ $review->created_at->diffForHumans() }}</span>
+                                            </div>
+                                            <div class="flex text-warning text-xs mb-2">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>
+                                                @endfor
+                                            </div>
+                                            @if($review->comment)
+                                            <p class="text-sm text-slate-600 dark:text-slate-300">{{ $review->comment }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
                         <!-- Booking Calendar -->
                         <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
                             <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">Bảng giá - <span x-text="dates.find(d => d.isoString === selectedDate)?.dayName"></span></h2>

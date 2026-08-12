@@ -287,6 +287,12 @@
                                                         <i class="fa-solid fa-xmark"></i>
                                                     </button>
                                                 @endif
+                                                
+                                                @if($booking->status == 'completed' && !\App\Models\Review::where('booking_id', $booking->id)->exists())
+                                                    <button @click="$dispatch('open-review-modal', { booking_id: '{{ $booking->id }}', field_id: '{{ $detail->field_id }}', field_name: '{{ $detail->field->name ?? 'Sân' }}' })" class="ml-4 px-4 py-2 rounded-xl bg-warning/10 text-warning hover:bg-warning hover:text-white flex items-center gap-2 transition-colors shadow-sm font-bold text-sm" title="Đánh Giá Sân">
+                                                        <i class="fa-solid fa-star"></i> Đánh giá
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
                                         @endforeach
@@ -351,6 +357,70 @@
                     <button type="submit" class="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-1">
                         Đồng Ý Hủy
                     </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Review Booking Modal (Task 12) -->
+<div x-data="{ show: false, booking_id: '', field_id: '', field_name: '', rating: 5 }" 
+    @open-review-modal.window="show = true; booking_id = $event.detail.booking_id; field_id = $event.detail.field_id; field_name = $event.detail.field_name; rating = 5"
+    x-show="show" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overflow-x-hidden bg-slate-900/50 backdrop-blur-sm"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0">
+    <div class="relative w-full max-w-md p-4" @click.away="show = false">
+        <div class="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden transform transition-all"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-8 scale-95">
+            
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 rounded-full bg-warning/10 text-warning flex items-center justify-center text-3xl mx-auto mb-4">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-heading text-slate-900 dark:text-white mb-1">Đánh Giá Trải Nghiệm</h3>
+                    <p class="text-sm text-slate-500">Sân: <strong x-text="field_name"></strong></p>
+                </div>
+                
+                <form action="{{ route('reviews.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="booking_id" :value="booking_id">
+                    <input type="hidden" name="field_id" :value="field_id">
+                    
+                    <!-- Rating Stars -->
+                    <div class="flex justify-center gap-2 mb-6 text-2xl">
+                        <template x-for="i in 5">
+                            <button type="button" @click="rating = i" 
+                                :class="rating >= i ? 'text-warning' : 'text-slate-300'"
+                                class="focus:outline-none transform transition-transform hover:scale-110">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+                        </template>
+                    </div>
+                    <input type="hidden" name="rating" :value="rating">
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Chia sẻ cảm nhận của bạn (Tùy chọn)</label>
+                        <textarea name="comment" rows="3" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200" placeholder="Chất lượng sân cỏ, dịch vụ thái độ nhân viên..."></textarea>
+                    </div>
+
+                    <div class="flex gap-3 w-full">
+                        <button type="button" @click="show = false" class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                            Hủy
+                        </button>
+                        <button type="submit" class="flex-1 py-3 px-4 bg-warning hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg shadow-warning/30 transition-all transform hover:-translate-y-1">
+                            Gửi Đánh Giá
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

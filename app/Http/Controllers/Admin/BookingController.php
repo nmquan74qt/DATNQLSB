@@ -163,6 +163,17 @@ class BookingController extends Controller
                 'end_time' => $endDatetime,
             ]);
 
+            // Task 6: Tự động tạo Payment (POS) khi Admin đặt sân hộ
+            \App\Models\Payment::create([
+                'booking_id' => $booking->id,
+                'user_id' => $booking->user_id,
+                'amount' => $calculatedTotal,
+                'payment_method' => 'pos', // Admin thu tại quầy
+                'status' => 'success',
+                'transaction_id' => 'POS_' . time() . '_' . $booking->id,
+                'paid_at' => now(),
+            ]);
+
             return back()->with('success', 'Đã tạo lịch đặt sân thành công!');
         });
     }
@@ -264,6 +275,17 @@ class BookingController extends Controller
                     'start_time' => $startDatetime,
                     'end_time' => $endDatetime,
                 ]);
+
+                // Task 6: Tự động tạo Payment (POS) khi Admin đặt sân hộ
+                \App\Models\Payment::create([
+                    'booking_id' => $booking->id,
+                    'user_id' => $booking->user_id,
+                    'amount' => $calculatedTotal,
+                    'payment_method' => 'pos',
+                    'status' => 'success',
+                    'transaction_id' => 'POS_' . time() . '_' . $booking->id,
+                    'paid_at' => now(),
+                ]);
                 
                 $successCount++;
             }
@@ -305,7 +327,16 @@ class BookingController extends Controller
                 $booking->user->increment('points', $pointsEarned);
             }
             
-            // Tự động tạo hóa đơn thanh toán Tiền mặt (Cash) cho phần chưa thanh toán
+            // Task 11: Tính phí ngoài giờ (Overtime Fee) nếu Admin có nhập
+            $overtimeFee = $request->input('overtime_fee', 0);
+            if ($overtimeFee > 0) {
+                $booking->update([
+                    'total_amount' => $booking->total_amount + $overtimeFee
+                ]);
+                $booking->details()->first()->update(['overtime_fee' => $overtimeFee]);
+            }
+            
+            // Task 5: Chặn chuyển completed nếu chưa thanh toán đủ
             $paidAmount = \App\Models\Payment::where('booking_id', $booking->id)
                             ->where('status', 'success')
                             ->sum('amount');
@@ -313,15 +344,21 @@ class BookingController extends Controller
             $unpaidAmount = $booking->total_amount - $paidAmount;
             
             if ($unpaidAmount > 0) {
-                \App\Models\Payment::create([
-                    'booking_id' => $booking->id,
-                    'user_id' => $booking->user_id,
-                    'amount' => $unpaidAmount,
-                    'payment_method' => 'cash',
-                    'status' => 'success',
-                    'transaction_id' => 'CASH_' . time() . '_' . $booking->id,
-                    'paid_at' => now(),
-                ]);
+                return back()->with('error', 'Không thể hoàn thành đơn! Khách hàng còn nợ ' . number_format($unpaidAmount) . 'đ. Vui lòng yêu cầu khách thanh toán đủ trước.');
+            }
+
+            // Task 10: Gamification - Nâng hạng (Level) cho user
+            if ($booking->user && $booking->user->role === 'customer') {
+                $totalPoints = $booking->user->points;
+                // Giả sử: Đồng = 0, Bạc = 1000, Vàng = 5000, Kim Cương = 10000
+                $newLevelId = 1; // Default
+                if ($totalPoints >= 10000) $newLevelId = 4;
+                elseif ($totalPoints >= 5000) $newLevelId = 3;
+                elseif ($totalPoints >= 1000) $newLevelId = 2;
+
+                if ($booking->user->level_id !== $newLevelId) {
+                    $booking->user->update(['level_id' => $newLevelId]);
+                }
             }
         }
         

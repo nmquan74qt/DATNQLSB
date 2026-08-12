@@ -282,7 +282,12 @@
                                         <div class="grow w-full">
                                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Giờ kết thúc thực tế (Để trống nếu đúng giờ)</label>
                                             <input type="datetime-local" name="actual_end_time" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
-                                            <p class="text-xs text-slate-500 mt-1">Phụ thu: <10p: Miễn phí | 10-30p: 50% giá sân/giờ | >30p: 100% giá sân/giờ.</p>
+                                            <p class="text-xs text-slate-500 mt-1">Ghi chú giờ kết thúc thực tế để lưu vết.</p>
+                                        </div>
+                                        <div class="grow w-full">
+                                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Phụ thu ngoài giờ (VND)</label>
+                                            <input type="number" name="overtime_fee" value="0" min="0" step="1000" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
+                                            <p class="text-xs text-slate-500 mt-1">Admin tự thỏa thuận tính tiền phụ thu và nhập vào đây.</p>
                                         </div>
                                         <button type="button" @click="submitStatus('completed')" class="shrink-0 px-6 py-2.5 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-sm shadow-emerald-500/30 transition-colors h-11 flex items-center gap-2">
                                             <i class="fa-solid fa-check-to-slot"></i> Check-out

@@ -153,6 +153,14 @@
                                 <input type="number" name="points" :value="customer.points" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/50">
                             </div>
                             <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Trạng thái (Task 9: Blacklist)</label>
+                                <select name="status" :value="customer.status" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/50">
+                                    <option value="active">Hoạt động (Active)</option>
+                                    <option value="inactive">Vô hiệu hóa (Inactive)</option>
+                                    <option value="banned">Khóa tài khoản (Banned/Blacklist)</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Mật Khẩu Mới (Bỏ trống nếu không đổi)</label>
                                 <input type="password" name="password" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/50">
                             </div>

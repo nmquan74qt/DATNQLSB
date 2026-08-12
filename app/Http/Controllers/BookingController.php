@@ -34,6 +34,11 @@ class BookingController extends Controller
                 return response()->json(['success' => false, 'message' => 'Sân đang bảo trì, không thể đặt lịch lúc này.']);
             }
 
+            // Task 3: Chặn Bypass thanh toán
+            if (!in_array($request->payment_method, ['vnpay', 'momo'])) {
+                return response()->json(['success' => false, 'message' => 'Phương thức thanh toán không hợp lệ!'], 400);
+            }
+
             $timeSlots = [];
             $realTotalAmount = 0; // Tình huống 2: Tính tổng tiền backend
             
@@ -143,7 +148,8 @@ class BookingController extends Controller
                 'booking_date' => $request->booking_date,
                 'total_amount' => $realTotalAmount, // Tình huống 2: backend tính
                 'status' => 'pending', 
-                'notes' => $notes
+                'notes' => $notes,
+                'voucher_id' => isset($voucher) ? $voucher->id : null // Task 8: Lưu voucher_id
             ]);
 
             // Second loop: Create booking details
@@ -189,6 +195,14 @@ class BookingController extends Controller
                 ]);
             }
 
+            // Task 3: Chặn Bypass thanh toán
+            // Bất kỳ phương thức nào không phải vnpay/momo đều bị từ chối
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Phương thức thanh toán không hợp lệ!'
+            ], 400);
+
             if (auth()->check()) {
                 auth()->user()->notify(new SystemNotification(
                     '⚽ Đặt sân thành công',
@@ -227,7 +241,7 @@ class BookingController extends Controller
         // Kiểm tra user đã sử dụng chưa
         $userId = auth()->id() ?? 1;
         $hasUsed = Booking::where('user_id', $userId)
-            ->where('notes', 'like', '%Có áp dụng mã ' . $voucher->code . '%')
+            ->where('voucher_id', $voucher->id) // Task 8: Dùng voucher_id
             ->whereIn('status', ['pending', 'confirmed', 'completed'])
             ->exists();
 
@@ -260,6 +274,11 @@ class BookingController extends Controller
 
     public function simulateWebhook($code)
     {
+        // Task 2: Bảo vệ route giả lập webhook bằng secret key
+        if (request()->query('secret') !== 'datn2026') {
+            return response()->json(['success' => false, 'message' => 'Forbidden: Invalid secret key'], 403);
+        }
+
         $booking = Booking::where('booking_code', $code)->first();
         if (!$booking) {
             return response()->json(['success' => false, 'message' => 'Booking not found']);

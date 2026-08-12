@@ -24,9 +24,20 @@ class AuthController extends Controller
         $remember = $request->has('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+            $user = Auth::user();
+            
+            // Task 1: Chặn tài khoản bị khóa/vô hiệu hóa
+            if ($user->status === 'banned' || $user->status === 'inactive') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors([
+                    'email' => 'Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ Admin.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
 
-            $user = Auth::user();
             if ($user->role === 'admin' || $user->role === 'staff') {
                 return redirect()->intended('/admin/dashboard')->with('success', 'Chào mừng trở lại, ' . $user->name);
             }

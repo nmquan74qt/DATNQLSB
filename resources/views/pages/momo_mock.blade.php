@@ -189,7 +189,7 @@
 
             // Redirect after 1.5s
             setTimeout(() => {
-                window.location.href = "{{ $returnUrl }}?orderId={{ $orderId }}&resultCode=0&message=Success";
+                window.location.href = "{{ $returnUrl }}?orderId={{ $orderId }}&resultCode=0&message=Success&amount={{ $amount }}";
             }, 1500);
         }
 

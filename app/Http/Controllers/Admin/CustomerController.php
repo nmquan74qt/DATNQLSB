@@ -29,13 +29,15 @@ class CustomerController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'points' => 'nullable|integer|min:0'
+            'points' => 'nullable|integer|min:0',
+            'status' => 'nullable|in:active,inactive,banned' // Task 9: Cho phép khóa tài khoản
         ]);
 
         $customer->update([
             'name' => $request->name,
             'phone' => $request->phone,
-            'points' => $request->points ?? $customer->points
+            'points' => $request->points ?? $customer->points,
+            'status' => $request->status ?? $customer->status
         ]);
 
         if ($request->filled('password')) {
