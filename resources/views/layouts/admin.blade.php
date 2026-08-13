@@ -174,39 +174,68 @@
                     </button>
 
                     <!-- Notifications -->
-                    <div class="relative" x-data="{ notifOpen: false }" @click.away="notifOpen = false">
-                        <button @click="notifOpen = !notifOpen" class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-primary transition-colors relative">
+                    <div class="relative" x-data="notificationPoller()" x-init="initPoller()">
+                        <button @click="open = !open" class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-primary transition-colors relative">
                             <i class="fa-regular fa-bell text-lg"></i>
-                            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
-                            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                            <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800 shadow-sm" x-cloak></span>
                         </button>
-                        <div x-show="notifOpen" x-transition x-cloak class="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50">
+                        
+                        <!-- Dropdown -->
+                        <div x-show="open" @click.away="open = false" x-transition.origin.top.right x-cloak class="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50">
                             <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
                                 <h3 class="font-bold text-slate-800 dark:text-white">Thông báo</h3>
-                                <a href="javascript:void(0);" class="text-xs text-primary hover:underline">Đánh dấu đã đọc</a>
+                                <button @click="markAllRead" class="text-xs text-primary hover:underline font-medium">Đánh dấu tất cả đã đọc</button>
                             </div>
-                            <div class="max-h-80 overflow-y-auto">
-                                <a href="javascript:void(0);" class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex gap-3 transition-colors">
-                                    <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                                        <i class="fa-solid fa-calendar-plus"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-slate-800 dark:text-slate-200">Khách đặt sân Cỏ Nhân Tạo A1</p>
-                                        <p class="text-xs text-slate-500">2 phút trước</p>
-                                    </div>
-                                </a>
-                                <a href="javascript:void(0);" class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex gap-3 transition-colors">
-                                    <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-500 flex items-center justify-center flex-shrink-0">
-                                        <i class="fa-solid fa-money-bill-wave"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-slate-800 dark:text-slate-200">Đã thanh toán VNPay thành công</p>
-                                        <p class="text-xs text-slate-500">10 phút trước</p>
-                                    </div>
-                                </a>
+                            <div class="max-h-80 overflow-y-auto custom-scrollbar">
+                                <template x-for="notif in notifications" :key="notif.id">
+                                    <a href="javascript:void(0);" class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex gap-3 transition-colors border-b border-slate-50 dark:border-slate-700/50" @click="markAsRead(notif.id)">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                                             :class="{
+                                                 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-500': notif.data.type === 'success',
+                                                 'bg-blue-100 dark:bg-blue-900/50 text-blue-500': notif.data.type === 'info',
+                                                 'bg-amber-100 dark:bg-amber-900/50 text-amber-500': notif.data.type === 'warning',
+                                                 'bg-pink-100 dark:bg-pink-900/50 text-pink-500': notif.data.type === 'promo',
+                                                 'bg-primary/10 text-primary': !['success', 'info', 'warning', 'promo'].includes(notif.data.type)
+                                             }">
+                                            <i class="fa-solid"
+                                               :class="{
+                                                   'fa-check': notif.data.type === 'success',
+                                                   'fa-info': notif.data.type === 'info',
+                                                   'fa-exclamation': notif.data.type === 'warning',
+                                                   'fa-gift': notif.data.type === 'promo',
+                                                   'fa-bell': !['success', 'info', 'warning', 'promo'].includes(notif.data.type)
+                                               }"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-slate-800 dark:text-slate-200" :class="{ 'font-bold': notif.read_at === null }" x-text="notif.data.title"></p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1" x-text="notif.data.message"></p>
+                                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1" x-text="formatTime(notif.created_at)"></p>
+                                        </div>
+                                        <div x-show="notif.read_at === null" class="shrink-0 mt-1 ml-auto">
+                                            <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                        </div>
+                                    </a>
+                                </template>
+                                <div x-show="notifications.length === 0" class="p-8 text-center text-slate-500 dark:text-slate-400">
+                                    <i class="fa-regular fa-bell-slash text-3xl mb-2 text-slate-200 dark:text-slate-600"></i>
+                                    <p class="text-sm">Không có thông báo nào</p>
+                                </div>
                             </div>
                             <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700 text-center">
-                                <a href="javascript:void(0);" class="text-sm text-primary hover:underline font-medium">Xem tất cả</a>
+                                <a href="{{ route('admin.notifications.index') }}" class="text-sm font-medium text-primary hover:underline">Xem tất cả</a>
+                            </div>
+                        </div>
+
+                        <!-- Real-time Toast -->
+                        <div x-show="toastOpen" x-transition.duration.500ms x-cloak class="fixed top-20 right-4 md:right-8 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-emerald-100 dark:border-emerald-900/50 overflow-hidden z-[100] cursor-pointer" @click="toastOpen = false; open = true">
+                            <div class="p-4 border-l-4 border-emerald-500 flex gap-3">
+                                <div class="shrink-0 mt-1 text-emerald-500">
+                                    <i class="fa-solid fa-square-check text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-800 dark:text-slate-200" x-text="latestNotification?.data?.title"></p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-2" x-text="latestNotification?.data?.message"></p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -257,5 +286,110 @@
     </div>
 
     @stack('scripts')
+    
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (!Alpine.data('notificationPoller')) {
+                Alpine.data('notificationPoller', () => ({
+                    open: false,
+                    toastOpen: false,
+                    notifications: [],
+                    unreadCount: 0,
+                    lastCheck: null,
+                    latestNotification: null,
+
+                    initPoller() {
+                        this.fetchNotifications();
+                        setInterval(() => {
+                            this.pollNewNotifications();
+                        }, 3000);
+                    },
+
+                    fetchNotifications() {
+                        fetch('{{ route('notifications.poll') ?? '/notifications/poll' }}')
+                            .then(res => res.json())
+                            .then(data => {
+                                this.notifications = data.notifications;
+                                this.unreadCount = data.count;
+                                this.lastCheck = data.now;
+                            })
+                            .catch(err => console.error('Notification error:', err));
+                    },
+
+                    pollNewNotifications() {
+                        if (!this.lastCheck) return;
+                        fetch(`{{ route('notifications.poll') ?? '/notifications/poll' }}?last_check=${encodeURIComponent(this.lastCheck)}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.notifications && data.notifications.length > 0) {
+                                    data.notifications.forEach(n => {
+                                        this.notifications.unshift(n);
+                                    });
+                                    this.unreadCount = data.count;
+                                    this.lastCheck = data.now;
+                                    
+                                    this.latestNotification = data.notifications[0];
+                                    this.toastOpen = true;
+                                    
+                                    setTimeout(() => {
+                                        this.toastOpen = false;
+                                    }, 5000);
+                                } else {
+                                    this.lastCheck = data.now;
+                                }
+                            })
+                            .catch(err => console.log('Poll error', err));
+                    },
+
+                    markAsRead(id) {
+                        fetch(`/notifications/${id}/read`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(() => {
+                            let notif = this.notifications.find(n => n.id === id);
+                            if(notif && notif.read_at === null) {
+                                notif.read_at = new Date().toISOString();
+                                this.unreadCount = Math.max(0, this.unreadCount - 1);
+                            }
+                        });
+                    },
+
+                    markAllRead() {
+                        fetch(`/notifications/read-all`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(() => {
+                            this.notifications.forEach(n => n.read_at = new Date().toISOString());
+                            this.unreadCount = 0;
+                        });
+                    },
+
+                    formatTime(dateStr) {
+                        if(!dateStr) return '';
+                        const date = new Date(dateStr);
+                        const now = new Date();
+                        const diffMs = now - date;
+                        const diffMins = Math.floor(diffMs / 60000);
+                        
+                        if (diffMins < 1) return 'Vừa xong';
+                        if (diffMins < 60) return `${diffMins} phút trước`;
+                        const diffHours = Math.floor(diffMins / 60);
+                        if (diffHours < 24) return `${diffHours} giờ trước`;
+                        const diffDays = Math.floor(diffHours / 24);
+                        if (diffDays < 7) return `${diffDays} ngày trước`;
+                        
+                        return date.toLocaleDateString('vi-VN');
+                    }
+                }));
+            }
+        });
+    </script>
+
 </body>
 </html>
