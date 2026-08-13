@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class FieldImage extends Model
 {
-    //
+    protected $guarded = [];
 }

@@ -7,14 +7,44 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Repositories\Eloquent\StaffRepository;
+use App\Services\PayrollService;
+use App\Http\Requests\MarkAttendanceRequest;
 
 class StaffController extends Controller
 {
+    protected $staffRepo;
+    protected $payrollService;
+
+    public function __construct(StaffRepository $staffRepo = null, PayrollService $payrollService = null)
+    {
+        $this->staffRepo = $staffRepo;
+        $this->payrollService = $payrollService;
+    }
+
     public function index()
     {
         // Lấy danh sách nhân viên và admin (ngoại trừ customer)
         $staffs = User::whereIn('role', ['admin', 'staff'])->latest()->get();
-        return view('admin.staff.index', compact('staffs'));
+        
+        $attendances = $this->staffRepo ? $this->staffRepo->getTodayAttendances() : collect();
+        $payrolls = $this->staffRepo ? $this->staffRepo->getCurrentMonthPayrolls() : collect();
+        
+        return view('admin.staff.index', compact('staffs', 'attendances', 'payrolls'));
+    }
+
+    public function markAttendance(MarkAttendanceRequest $request)
+    {
+        if ($this->staffRepo) {
+            $this->staffRepo->markAttendance($request->validated());
+        }
+        return redirect()->route('admin.staff.index')->with('success', 'Đã cập nhật điểm danh!');
+    }
+
+    public function generatePayroll()
+    {
+        \App\Jobs\GeneratePayrollJob::dispatch();
+        return redirect()->route('admin.staff.index')->with('success', 'Đang xử lý tạo bảng lương ngầm (Background Job). Tiến trình sẽ sớm hoàn tất!');
     }
 
     public function store(Request $request)

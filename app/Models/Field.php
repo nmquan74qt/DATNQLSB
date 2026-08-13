@@ -18,6 +18,11 @@ class Field extends Model
         return $this->hasMany(BookingDetail::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(FieldImage::class);
+    }
+
     public function parent()
     {
         return $this->belongsTo(Field::class, 'parent_id');

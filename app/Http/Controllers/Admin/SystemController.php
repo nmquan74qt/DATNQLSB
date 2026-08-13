@@ -40,12 +40,21 @@ class SystemController extends Controller
             mkdir(storage_path('app/backups'), 0755, true);
         }
 
-        // On Windows with XAMPP, mysqldump needs to be in PATH or specify full path
-        // For standard local dev, if mysqldump is accessible:
-        $passwordPart = $password ? "-p{$password}" : "";
-        $command = "mysqldump -u {$username} {$passwordPart} {$database} > \"{$path}\" 2>&1";
+        $connection = env('DB_CONNECTION');
         
-        shell_exec($command);
+        if ($connection === 'sqlite') {
+            $sqlitePath = database_path('database.sqlite');
+            if (file_exists($sqlitePath)) {
+                copy($sqlitePath, $path);
+            } else {
+                return redirect()->back()->with('error', 'Không tìm thấy file database.sqlite.');
+            }
+        } else {
+            // On Windows with XAMPP, mysqldump needs to be in PATH or specify full path
+            $passwordPart = $password ? "-p{$password}" : "";
+            $command = "mysqldump -u {$username} {$passwordPart} {$database} > \"{$path}\" 2>&1";
+            shell_exec($command);
+        }
 
         if (file_exists($path) && filesize($path) > 0) {
             return Response::download($path)->deleteFileAfterSend(true);

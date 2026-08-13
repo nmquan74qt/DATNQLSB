@@ -201,7 +201,6 @@ class BookingController extends Controller
             }
 
             // Fallback (thực tế không chạy đến đây vì đã bị chặn bởi validator và return ở trên)
-            \Illuminate\Support\Facades\DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Phương thức thanh toán không hợp lệ!'

@@ -88,6 +88,8 @@ Route::middleware('auth')->group(function () {
             
             Route::resource('fields', \App\Http\Controllers\FieldController::class);
             Route::resource('time-slots', \App\Http\Controllers\Admin\TimeSlotController::class)->except(['create', 'edit', 'show']);
+            Route::post('staff/attendance', [\App\Http\Controllers\Admin\StaffController::class, 'markAttendance'])->name('staff.attendance');
+            Route::post('staff/payroll', [\App\Http\Controllers\Admin\StaffController::class, 'generatePayroll'])->name('staff.payroll');
             Route::resource('staff', \App\Http\Controllers\Admin\StaffController::class)->except(['create', 'edit', 'show']);
             Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
             Route::get('/payments/export', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])->name('payments.export');

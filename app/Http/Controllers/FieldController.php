@@ -43,11 +43,22 @@ class FieldController extends Controller
         unset($storeData['images']);
 
         if ($request->hasFile('images')) {
-            $imagePath = $request->file('images')[0]->store('fields', 'public');
+            $images = $request->file('images');
+            $imagePath = $images[0]->store('fields', 'public');
             $storeData['image'] = $imagePath;
         }
 
-        $this->fieldService->createField($storeData);
+        $field = $this->fieldService->createField($storeData);
+
+        if (isset($images)) {
+            foreach ($images as $index => $image) {
+                $path = $image->store('fields', 'public');
+                $field->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => $index === 0
+                ]);
+            }
+        }
 
         return redirect()->route('admin.fields.index')->with('success', 'Thêm sân bóng thành công!');
     }
@@ -75,12 +86,24 @@ class FieldController extends Controller
         unset($updateData['images']);
 
         if ($request->hasFile('images')) {
-            // For now, save the first image to field->image
-            $imagePath = $request->file('images')[0]->store('fields', 'public');
+            $images = $request->file('images');
+            $imagePath = $images[0]->store('fields', 'public');
             $updateData['image'] = $imagePath;
         }
 
         $this->fieldService->updateField($id, $updateData);
+
+        if (isset($images)) {
+            $field = $this->fieldService->getFieldById($id);
+            // Có thể xóa ảnh cũ nếu muốn, hoặc cứ thêm ảnh mới
+            foreach ($images as $index => $image) {
+                $path = $image->store('fields', 'public');
+                $field->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => false
+                ]);
+            }
+        }
 
         return redirect()->route('admin.fields.index')->with('success', 'Cập nhật sân bóng thành công!');
     }

@@ -177,6 +177,15 @@ class BookingController extends Controller
                 'paid_at' => now(),
             ]);
 
+            // Send BookingConfirmed Mail
+            if ($booking->user && $booking->user->email) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($booking->user->email)->send(new \App\Mail\BookingConfirmed($booking));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Error sending BookingConfirmed email: ' . $e->getMessage());
+                }
+            }
+
             return back()->with('success', 'Đã tạo lịch đặt sân thành công!');
         });
     }
