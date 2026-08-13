@@ -192,6 +192,18 @@
             isProcessingVoucher: false,
             isProcessing: false,
             
+            init() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const voucherCode = urlParams.get('voucher');
+                if (voucherCode) {
+                    this.voucherInput = voucherCode;
+                    // Need a slight delay to let Alpine fully initialize before fetching
+                    setTimeout(() => {
+                        this.applyVoucher();
+                    }, 100);
+                }
+            },
+            
             formatCurrency(amount) {
                 return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
             },

@@ -298,16 +298,26 @@
                             </div>
 
                             <!-- Voucher -->
-                            <div class="mb-4 pt-4 border-t border-slate-100">
-                                <p class="text-sm font-bold text-slate-700 mb-2"><i class="fa-solid fa-ticket text-emerald-500 mr-1"></i> Mã giảm giá</p>
+                            <div class="mb-5 pt-5 border-t border-slate-100">
+                                <div class="flex items-center gap-2 text-sm font-bold text-slate-700 mb-3">
+                                    <i class="fa-solid fa-ticket text-emerald-500"></i> Mã giảm giá
+                                </div>
                                 <div class="flex gap-2">
-                                    <input type="text" x-model="voucherInput" class="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm uppercase focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" placeholder="NHẬP MÃ">
-                                    <button @click="applyVoucher()" :disabled="isProcessingVoucher || !voucherInput || selectedSlots.length === 0" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors">
+                                    <div class="relative flex-1">
+                                        <input type="text" x-model="voucherInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium uppercase tracking-wider text-slate-800 placeholder:text-slate-400 placeholder:normal-case focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none" placeholder="Nhập mã ưu đãi...">
+                                        <button x-show="voucherInput" @click="resetVoucher()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <button @click="applyVoucher()" :disabled="isProcessingVoucher || !voucherInput || selectedSlots.length === 0" class="bg-slate-800 hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm whitespace-nowrap">
                                         <span x-show="!isProcessingVoucher">Áp dụng</span>
-                                        <span x-show="isProcessingVoucher"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                                        <span x-show="isProcessingVoucher"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
                                     </button>
                                 </div>
-                                <div x-show="voucherMessage" class="text-xs mt-2 font-bold" :class="voucherSuccess ? 'text-emerald-500' : 'text-red-500'" x-html="voucherMessage"></div>
+                                <div x-show="voucherMessage" x-transition class="text-xs mt-2.5 font-medium flex items-center gap-1.5" :class="voucherSuccess ? 'text-emerald-600' : 'text-red-500'">
+                                    <i class="fa-solid" :class="voucherSuccess ? 'fa-check-circle' : 'fa-circle-exclamation'"></i>
+                                    <span x-text="voucherMessage"></span>
+                                </div>
                             </div>
                             
                             <!-- Discount display if applied -->
@@ -483,6 +493,13 @@
             selectedDate: null,
             selectedSlots: [],
             
+            // Voucher State
+            voucherInput: '',
+            appliedVoucher: null,
+            voucherMessage: '',
+            voucherSuccess: false,
+            isProcessingVoucher: false,
+            
             init() {
                 // Generate next 14 days
                 for(let i=0; i<14; i++) {
@@ -507,6 +524,13 @@
                 this.$watch('selectedDate', value => {
                     this.selectedSlots = [];
                     this.resetVoucher();
+                });
+                
+                // Also reset voucher if slots change
+                this.$watch('selectedSlots', value => {
+                    if (value.length === 0) {
+                        this.resetVoucher();
+                    }
                 });
             },
             
@@ -599,7 +623,11 @@
             goToCheckout() {
                 if (this.selectedSlots.length > 0) {
                     const slotIds = this.selectedSlots.map(s => s.id).join(',');
-                    window.location.href = `{{ route('checkout') }}?field_id={{ $field->id }}&date=${this.selectedDate}&slots=${slotIds}`;
+                    let url = `{{ route('checkout') }}?field_id={{ $field->id }}&date=${this.selectedDate}&slots=${slotIds}`;
+                    if (this.appliedVoucher) {
+                        url += `&voucher=${this.appliedVoucher.code}`;
+                    }
+                    window.location.href = url;
                 }
             },
             
@@ -610,6 +638,61 @@
                     total += this.getSlotPrice(slot);
                 });
                 return total;
+            },
+            
+            get finalPrice() {
+                let price = this.originalPrice - this.discountAmount;
+                return price < 0 ? 0 : price;
+            },
+            
+            get discountAmount() {
+                if(!this.appliedVoucher) return 0;
+                if(this.appliedVoucher.discount_percent) {
+                    return this.originalPrice * (this.appliedVoucher.discount_percent / 100);
+                } else if(this.appliedVoucher.discount_amount) {
+                    return parseFloat(this.appliedVoucher.discount_amount);
+                }
+                return 0;
+            },
+            
+            resetVoucher() {
+                this.appliedVoucher = null;
+                this.voucherInput = '';
+                this.voucherMessage = '';
+                this.voucherSuccess = false;
+            },
+            
+            applyVoucher() {
+                if(!this.voucherInput) return;
+                
+                this.isProcessingVoucher = true;
+                this.voucherMessage = '';
+                
+                fetch('/api/check-voucher', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ code: this.voucherInput })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    this.isProcessingVoucher = false;
+                    this.voucherSuccess = data.success;
+                    this.voucherMessage = data.message || (data.success ? 'Áp dụng mã giảm giá thành công!' : 'Mã không hợp lệ');
+                    
+                    if(data.success) {
+                        this.appliedVoucher = data.voucher;
+                    } else {
+                        this.appliedVoucher = null;
+                    }
+                })
+                .catch(err => {
+                    this.isProcessingVoucher = false;
+                    this.voucherSuccess = false;
+                    this.voucherMessage = 'Có lỗi xảy ra, vui lòng thử lại';
+                });
             },
             
             triggerConfetti() {
