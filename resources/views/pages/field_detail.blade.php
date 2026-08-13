@@ -302,7 +302,7 @@
                                 <span class="text-2xl font-extrabold text-slate-900 whitespace-nowrap" x-text="formatCurrency(originalPrice)"></span>
                             </div>
 
-                            <button @click="goToCheckout()" :disabled="selectedSlots.length === 0" class="w-full bg-slate-300 text-slate-600 hover:bg-emerald-500 hover:text-white [&:not(:disabled)]:bg-emerald-500 [&:not(:disabled)]:text-white disabled:opacity-70 disabled:cursor-not-allowed font-bold py-4 rounded-xl shadow-md transition-all transform [&:not(:disabled)]:hover:-translate-y-1">
+                            <button @click="goToCheckout()" :disabled="selectedSlots.length === 0" class="w-full font-bold py-4 rounded-xl shadow-md transition-all transform" :class="selectedSlots.length > 0 ? 'bg-emerald-500 text-white hover:bg-emerald-600 hover:-translate-y-1' : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-70'">
                                 Đặt sân ngay
                             </button>
                             <p class="text-xs text-center text-slate-400 mt-4">Bạn chưa bị trừ tiền ở bước này</p>
