@@ -116,9 +116,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <!-- Attendance -->
         <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading">Chấm công hôm nay</h3>
-                <form action="{{ route('admin.staff.attendance') }}" method="POST" class="flex gap-2 items-center">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading whitespace-nowrap">Chấm công hôm nay</h3>
+                <form action="{{ route('admin.staff.attendance') }}" method="POST" class="flex flex-wrap gap-2 items-center w-full xl:w-auto">
                     @csrf
                     <select name="user_id" required class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200 text-sm">
                         <option value="">-- Chọn nhân viên --</option>
@@ -168,9 +168,9 @@
 
         <!-- Payroll -->
         <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading">Bảng lương tháng này</h3>
-                <form action="{{ route('admin.staff.payroll') }}" method="POST">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading whitespace-nowrap">Bảng lương tháng này</h3>
+                <form action="{{ route('admin.staff.payroll') }}" method="POST" class="w-full xl:w-auto text-right">
                     @csrf
                     <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-sm text-sm font-bold transition-colors">
                         <i class="fa-solid fa-file-invoice-dollar mr-1"></i> Tính lương
