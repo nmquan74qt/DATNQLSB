@@ -668,7 +668,7 @@
                 this.isProcessingVoucher = true;
                 this.voucherMessage = '';
                 
-                fetch('/api/check-voucher', {
+                fetch('{{ route("voucher.check") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
