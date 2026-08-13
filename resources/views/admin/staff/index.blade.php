@@ -116,27 +116,33 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <!-- Attendance -->
         <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden p-6">
-            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading whitespace-nowrap">Chấm công hôm nay</h3>
-                <form action="{{ route('admin.staff.attendance') }}" method="POST" class="flex flex-wrap gap-2 items-center w-full xl:w-auto">
-                    @csrf
-                    <select name="user_id" required class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200 text-sm">
+            <div class="mb-5 pb-4 border-b border-slate-100 dark:border-slate-700">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading">Chấm công hôm nay</h3>
+                <p class="text-sm text-slate-500 mt-1">Ghi nhận trạng thái làm việc của nhân viên trong ngày</p>
+            </div>
+            
+            <form action="{{ route('admin.staff.attendance') }}" method="POST" class="flex flex-col sm:flex-row gap-3 mb-6 bg-slate-50 dark:bg-slate-700/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
+                @csrf
+                <div class="flex-1">
+                    <select name="user_id" required class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-slate-800 dark:text-slate-200 text-sm font-medium shadow-sm cursor-pointer">
                         <option value="">-- Chọn nhân viên --</option>
                         @foreach($staffs as $staff)
                             <option value="{{ $staff->id }}">{{ $staff->name }}</option>
                         @endforeach
                     </select>
-                    <select name="status" required class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200 text-sm">
+                </div>
+                <div class="sm:w-40">
+                    <select name="status" required class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-slate-800 dark:text-slate-200 text-sm font-medium shadow-sm cursor-pointer">
                         <option value="present">Có mặt</option>
                         <option value="absent">Vắng mặt</option>
                         <option value="late">Đi trễ</option>
                         <option value="leave">Nghỉ phép</option>
                     </select>
-                    <button type="submit" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm text-sm font-bold transition-colors">
-                        <i class="fa-solid fa-clock mr-1"></i> Điểm danh
-                    </button>
-                </form>
-            </div>
+                </div>
+                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md shadow-emerald-500/20 text-sm font-bold transition-all whitespace-nowrap active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-clock"></i> Điểm danh
+                </button>
+            </form>
             
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
