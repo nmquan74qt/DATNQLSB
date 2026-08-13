@@ -168,6 +168,15 @@
                 <!-- Right side -->
                 <div class="flex items-center gap-3">
                     
+                    <!-- Self Check-in Button -->
+                    <form action="{{ route('admin.self.attendance') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-900/40 dark:hover:bg-emerald-900/60 dark:text-emerald-400 px-3 py-2 md:px-4 md:py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2 border border-emerald-200/50 dark:border-emerald-800/50 shadow-sm">
+                            <i class="fa-solid fa-clipboard-user"></i>
+                            <span class="hidden md:inline">Chấm công</span>
+                        </button>
+                    </form>
+
                     <button @click="darkMode = !darkMode" class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-primary transition-colors">
                         <i class="fa-solid fa-moon" x-show="!darkMode"></i>
                         <i class="fa-solid fa-sun" x-show="darkMode" x-cloak></i>

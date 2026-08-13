@@ -38,7 +38,19 @@ class StaffController extends Controller
         if ($this->staffRepo) {
             $this->staffRepo->markAttendance($request->validated());
         }
-        return redirect()->route('admin.staff.index')->with('success', 'Đã cập nhật điểm danh!');
+        return back()->with('success', 'Đã cập nhật điểm danh!');
+    }
+
+    public function selfAttendance(Request $request)
+    {
+        if ($this->staffRepo) {
+            $this->staffRepo->markAttendance([
+                'user_id' => auth()->id(),
+                'status' => 'present',
+                'date' => now()->format('Y-m-d')
+            ]);
+        }
+        return back()->with('success', 'Bạn đã chấm công (Có mặt) hôm nay thành công!');
     }
 
     public function generatePayroll()

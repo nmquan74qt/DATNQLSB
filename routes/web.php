@@ -73,6 +73,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/bookings/{id}/status', [\App\Http\Controllers\Admin\BookingController::class, 'updateStatus'])->name('bookings.update-status');
         Route::get('/bookings/calendar-data', [\App\Http\Controllers\Admin\BookingController::class, 'calendarData'])->name('bookings.calendar');
         
+        // Self-Attendance for all staff
+        Route::post('/self-attendance', [\App\Http\Controllers\Admin\StaffController::class, 'selfAttendance'])->name('self.attendance');
+        
         // Customers & Blacklist checking
         Route::get('/customers', [\App\Http\Controllers\Admin\CustomerController::class, 'index'])->name('customers.index');
         Route::put('/customers/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'update'])->name('customers.update');
