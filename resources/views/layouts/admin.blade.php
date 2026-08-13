@@ -76,6 +76,11 @@
                     <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Sân Bóng</span>
                 </a>
 
+                <a href="{{ route('admin.field-types.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.field-types.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Loại Sân">
+                    <i class="fa-solid fa-tags w-6 text-center text-lg"></i>
+                    <span class="font-medium whitespace-nowrap" :class="{ 'hidden': !sidebarOpen }">Loại Sân</span>
+                </a>
+
                 <a href="{{ route('admin.time-slots.index') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all {{ request()->routeIs('admin.time-slots.*') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-primary dark:text-slate-400' }}" title="Bảng Giá & Khung Giờ">
                     <i class="fa-solid fa-clock w-6 text-center text-lg"></i>
                     <span class="font-medium whitespace-nowrap flex-grow truncate" :class="{ 'hidden': !sidebarOpen }">Bảng Giá & Khung Giờ</span>

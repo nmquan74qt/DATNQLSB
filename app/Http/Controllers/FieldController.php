@@ -42,17 +42,23 @@ class FieldController extends Controller
         $storeData = $validated;
         unset($storeData['images']);
 
+        $imagePaths = [];
         if ($request->hasFile('images')) {
             $images = $request->file('images');
-            $imagePath = $images[0]->store('fields', 'public');
-            $storeData['image'] = $imagePath;
+            foreach ($images as $index => $image) {
+                $path = $image->store('fields', 'public');
+                $imagePaths[] = $path;
+                
+                if ($index === 0) {
+                    $storeData['image'] = $path;
+                }
+            }
         }
 
         $field = $this->fieldService->createField($storeData);
 
-        if (isset($images)) {
-            foreach ($images as $index => $image) {
-                $path = $image->store('fields', 'public');
+        if (!empty($imagePaths)) {
+            foreach ($imagePaths as $index => $path) {
                 $field->images()->create([
                     'image_path' => $path,
                     'is_primary' => $index === 0
@@ -85,19 +91,24 @@ class FieldController extends Controller
         $updateData = $validated;
         unset($updateData['images']);
 
+        $imagePaths = [];
         if ($request->hasFile('images')) {
             $images = $request->file('images');
-            $imagePath = $images[0]->store('fields', 'public');
-            $updateData['image'] = $imagePath;
+            foreach ($images as $index => $image) {
+                $path = $image->store('fields', 'public');
+                $imagePaths[] = $path;
+                
+                if ($index === 0) {
+                    $updateData['image'] = $path;
+                }
+            }
         }
 
         $this->fieldService->updateField($id, $updateData);
 
-        if (isset($images)) {
+        if (!empty($imagePaths)) {
             $field = $this->fieldService->getFieldById($id);
-            // Có thể xóa ảnh cũ nếu muốn, hoặc cứ thêm ảnh mới
-            foreach ($images as $index => $image) {
-                $path = $image->store('fields', 'public');
+            foreach ($imagePaths as $index => $path) {
                 $field->images()->create([
                     'image_path' => $path,
                     'is_primary' => false

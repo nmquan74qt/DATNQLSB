@@ -1,58 +1,89 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"><a href="#" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Pitch Admin Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Hệ thống Quản lý Sân Bóng (Pitch Admin)
 
-## About Laravel
+Đây là hệ thống quản lý sân bóng mini (Pitch Admin) dành cho Đồ án Tốt nghiệp (DATN), được phát triển bằng Laravel 11. Hệ thống cho phép quản trị viên (Admin) quản lý sân bóng, lịch đặt sân, hóa đơn, khách hàng, nhân sự và cung cấp giao diện đặt sân trực tuyến cho khách hàng.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Tính năng nổi bật
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Khách hàng (User)
+- Xem danh sách và chi tiết sân bóng (kèm đánh giá, nhiều ảnh minh họa).
+- Đặt sân trực tuyến theo các khung giờ (có kiểm tra trùng lặp).
+- Thanh toán trực tuyến (tích hợp mock VNPay/MoMo).
+- Đăng nhập/Đăng ký qua form hoặc qua Google (Socialite).
+- Xem lịch sử đặt sân, viết đánh giá (Review).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Quản trị viên (Admin)
+- **Quản lý Sân Bóng**: Thêm/sửa/xóa sân, hỗ trợ upload nhiều ảnh, cấu hình loại sân, khung giờ, bảo trì.
+- **Quản lý Đặt Sân & Hóa Đơn**: Duyệt lịch, tạo lịch trực tiếp (đặt hộ), thay đổi trạng thái thanh toán, áp dụng mã giảm giá (Voucher) và phụ thu.
+- **Thống kê Doanh Thu**: Bảng điều khiển (Dashboard) xem biểu đồ doanh thu, tỷ lệ lấp đầy sân theo ngày/tháng/năm.
+- **Quản lý Nhân Sự**: Thêm, sửa, xóa tài khoản Admin/Nhân viên, điểm danh (Attendance) và tính lương (Payroll).
+- **Tính năng mở rộng**: Quản lý Voucher, Tin tức (Blog), Thông báo (Notification).
+- **Hệ thống**: Chức năng tự động Backup Database (hỗ trợ SQLite/MySQL).
 
-## Learning Laravel
+## 🛠 Tech Stack
+- **Framework**: Laravel 11 (PHP ^8.3|^8.4)
+- **Frontend**: Blade Template, Tailwind CSS, Alpine.js, FontAwesome
+- **Database**: SQLite (Mặc định) hoặc MySQL
+- **Tooling**: Vite (cho biên dịch tài sản CSS/JS)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📋 Hướng dẫn cài đặt
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/nmquan74qt/DATNQLSB.git
+   cd DATNQLSB
+   ```
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+2. **Cài đặt các gói phụ thuộc PHP (Composer):**
+   ```bash
+   composer install
+   ```
 
-## Agentic Development
+3. **Cài đặt các gói phụ thuộc Frontend (NPM):**
+   ```bash
+   npm install
+   npm run build
+   ```
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+4. **Cấu hình môi trường (.env):**
+   Copy file `.env.example` thành `.env`
+   ```bash
+   cp .env.example .env
+   ```
+   *Lưu ý: Mặc định dự án sử dụng `DB_CONNECTION=sqlite`. Đảm bảo extension `pdo_sqlite` trong `php.ini` đã được bật.*
 
+5. **Tạo application key:**
+   ```bash
+   php artisan key:generate
+   ```
+
+6. **Chạy Migration và Seeder:**
+   *(Lệnh này sẽ tạo cấu trúc bảng và chèn dữ liệu mẫu, bao gồm cả tài khoản admin)*
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+
+7. **Link Storage (để hiện thị ảnh upload):**
+   ```bash
+   php artisan storage:link
+   ```
+
+8. **Chạy server phát triển:**
+   ```bash
+   php artisan serve
+   ```
+   Truy cập vào `http://localhost:8000`.
+
+## 👤 Tài khoản mặc định (từ Seeder)
+- **Admin**: `admin@pitch.com` / `password`
+- **Khách hàng**: `customer@pitch.com` / `password`
+
+## 🧪 Chạy Unit Test
+Hệ thống đi kèm một số bài kiểm tra (Feature Test) để đảm bảo độ tin cậy. Bạn có thể chạy:
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php artisan test
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📝 Giấy phép (License)
+Dự án phục vụ mục đích đồ án học tập, áp dụng theo giấy phép [MIT license](https://opensource.org/licenses/MIT).

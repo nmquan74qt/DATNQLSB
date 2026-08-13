@@ -86,7 +86,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
             Route::post('/notifications/send', [\App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('notifications.send');
             
-            Route::resource('fields', \App\Http\Controllers\FieldController::class);
+            Route::resource('fields', \App\Http\Controllers\Admin\FieldController::class);
+            Route::resource('field-types', \App\Http\Controllers\Admin\FieldTypeController::class);
             Route::resource('time-slots', \App\Http\Controllers\Admin\TimeSlotController::class)->except(['create', 'edit', 'show']);
             Route::post('staff/attendance', [\App\Http\Controllers\Admin\StaffController::class, 'markAttendance'])->name('staff.attendance');
             Route::post('staff/payroll', [\App\Http\Controllers\Admin\StaffController::class, 'generatePayroll'])->name('staff.payroll');

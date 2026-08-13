@@ -112,6 +112,87 @@
         </div>
     </div>
 
+    <!-- Attendance and Payroll Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <!-- Attendance -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading">Chấm công hôm nay</h3>
+                <form action="{{ route('admin.staff.attendance') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm text-sm font-bold transition-colors">
+                        <i class="fa-solid fa-clock mr-1"></i> Điểm danh
+                    </button>
+                </form>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <th class="px-4 py-2">Nhân viên</th>
+                            <th class="px-4 py-2">Ngày</th>
+                            <th class="px-4 py-2">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        @forelse($attendances ?? [] as $attendance)
+                        <tr>
+                            <td class="px-4 py-3 text-sm font-medium">{{ $attendance->user->name ?? 'N/A' }}</td>
+                            <td class="px-4 py-3 text-sm text-slate-500">{{ $attendance->date }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full text-xs font-bold">{{ $attendance->status }}</span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="px-4 py-6 text-center text-slate-500 text-sm">Chưa có dữ liệu chấm công.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payroll -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading">Bảng lương tháng này</h3>
+                <form action="{{ route('admin.staff.payroll') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-sm text-sm font-bold transition-colors">
+                        <i class="fa-solid fa-file-invoice-dollar mr-1"></i> Tính lương
+                    </button>
+                </form>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <th class="px-4 py-2">Nhân viên</th>
+                            <th class="px-4 py-2">Kỳ lương</th>
+                            <th class="px-4 py-2 text-right">Tổng lương</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        @forelse($payrolls ?? [] as $payroll)
+                        <tr>
+                            <td class="px-4 py-3 text-sm font-medium">{{ $payroll->user->name ?? 'N/A' }}</td>
+                            <td class="px-4 py-3 text-sm text-slate-500">{{ $payroll->month }}/{{ $payroll->year }}</td>
+                            <td class="px-4 py-3 text-sm text-right font-bold text-emerald-600">{{ number_format($payroll->total_salary) }} đ</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="px-4 py-6 text-center text-slate-500 text-sm">Chưa có bảng lương.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Create / Edit -->
     <div x-show="isModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <!-- Backdrop -->

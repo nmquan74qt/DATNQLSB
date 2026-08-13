@@ -1,12 +1,20 @@
 <x-mail::message>
-# Introduction
+# Xác nhận Đặt Sân Thành Công!
 
-The body of your message.
+Chào bạn,
 
-<x-mail::button :url="''">
-Button Text
+Cảm ơn bạn đã đặt sân tại hệ thống của chúng tôi. Dưới đây là thông tin chi tiết đơn đặt sân của bạn:
+
+**Mã đặt sân:** {{ $booking->booking_code }}  
+**Sân bóng:** {{ $booking->field->name ?? 'Không rõ' }}  
+**Thời gian bắt đầu:** {{ \Carbon\Carbon::parse($booking->start_time)->format('H:i d/m/Y') }}  
+**Thời gian kết thúc:** {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i d/m/Y') }}  
+**Tổng thanh toán:** {{ number_format($booking->total_amount) }} VNĐ
+
+<x-mail::button :url="route('home')">
+Trang Chủ
 </x-mail::button>
 
-Thanks,<br>
+Trân trọng,<br>
 {{ config('app.name') }}
 </x-mail::message>

@@ -22,7 +22,11 @@
                 </h1>
                 <div class="flex items-center gap-6 text-slate-600 font-medium text-sm">
                     <span class="flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-primary"></i> Cơ sở Trung Tâm</span>
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-star text-warning"></i> 4.9/5 (128 Đánh giá)</span>
+                    @php
+                        $reviewsCount = \App\Models\Review::where('field_id', $field->id)->where('is_approved', true)->count();
+                        $avgRating = $reviewsCount > 0 ? \App\Models\Review::where('field_id', $field->id)->where('is_approved', true)->avg('rating') : 5.0;
+                    @endphp
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-star text-warning"></i> {{ number_format($avgRating, 1) }}/5 ({{ $reviewsCount }} Đánh giá)</span>
                 </div>
             </div>
 
@@ -35,18 +39,21 @@
                 </div>
                 <!-- Right Side Images -->
                 @php
-                    $gallery = [
+                    $fallbackImages = [
                         'https://images.pexels.com/photos/47730/the-ball-stadion-football-the-pitch-47730.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
                         'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
                         'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
-                        'https://images.pexels.com/photos/3628912/pexels-photo-3628912.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
-                        'https://images.pexels.com/photos/274422/pexels-photo-274422.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1',
-                        'https://images.pexels.com/photos/1618269/pexels-photo-1618269.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1'
+                        'https://images.pexels.com/photos/3628912/pexels-photo-3628912.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1'
                     ];
-                    srand($field->id);
-                    shuffle($gallery);
-                    $side = array_slice($gallery, 0, 4);
-                    srand();
+                    $fieldImages = $field->images()->get();
+                    $side = [];
+                    for ($i = 0; $i < 4; $i++) {
+                        if (isset($fieldImages[$i]) && $fieldImages[$i]->image_path != $field->image) {
+                            $side[] = asset('storage/' . $fieldImages[$i]->image_path);
+                        } else {
+                            $side[] = $fallbackImages[$i];
+                        }
+                    }
                 @endphp
                 <div class="hidden md:flex flex-col gap-2 h-full md:col-span-1">
                     <div class="h-1/2 relative group cursor-pointer overflow-hidden">

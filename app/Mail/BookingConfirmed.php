@@ -14,12 +14,14 @@ class BookingConfirmed extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $booking;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($booking)
     {
-        //
+        $this->booking = $booking;
     }
 
     /**
@@ -28,7 +30,7 @@ class BookingConfirmed extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking Confirmed',
+            subject: 'Xác nhận đặt sân - ' . $this->booking->booking_code,
         );
     }
 
