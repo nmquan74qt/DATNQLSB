@@ -124,7 +124,7 @@ class BookingController extends Controller
                 // Kiểm tra user đã sử dụng chưa
                 $userId = auth()->id() ?? 1;
                 $hasUsed = Booking::where('user_id', $userId)
-                    ->where('notes', 'like', '%Có áp dụng mã ' . $voucher->code . '%')
+                    ->where('voucher_id', $voucher->id)
                     ->whereIn('status', ['pending', 'confirmed', 'completed'])
                     ->exists();
 
