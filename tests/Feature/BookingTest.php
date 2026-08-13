@@ -23,14 +23,14 @@ class BookingTest extends TestCase
             'code' => 'TEST100',
             'discount_amount' => 10000,
             'is_active' => true,
-            'usage_limit' => 10,
+            'max_uses' => 10,
             'used_count' => 0,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addDays(5),
+            'valid_from' => now()->subDay(),
+            'valid_to' => now()->addDays(5),
         ]);
 
         // 2. Act: Send POST request to check voucher
-        $response = $this->postJson(route('api.vouchers.check'), [
+        $response = $this->postJson(route('voucher.check'), [
             'code' => 'TEST100',
             'total_amount' => 100000
         ]);
@@ -39,7 +39,10 @@ class BookingTest extends TestCase
         $response->assertStatus(200)
                  ->assertJson([
                      'success' => true,
-                     'discount_amount' => 10000
+                     'voucher' => [
+                         'code' => 'TEST100',
+                         'discount_amount' => 10000
+                     ]
                  ]);
     }
 
@@ -49,21 +52,21 @@ class BookingTest extends TestCase
             'code' => 'EXPIRED',
             'discount_amount' => 10000,
             'is_active' => true,
-            'usage_limit' => 10,
+            'max_uses' => 10,
             'used_count' => 0,
-            'start_date' => now()->subDays(10),
-            'end_date' => now()->subDays(1),
+            'valid_from' => now()->subDays(10),
+            'valid_to' => now()->subDays(1),
         ]);
 
-        $response = $this->postJson(route('api.vouchers.check'), [
+        $response = $this->postJson(route('voucher.check'), [
             'code' => 'EXPIRED',
             'total_amount' => 100000
         ]);
 
-        $response->assertStatus(400)
+        $response->assertStatus(200)
                  ->assertJson([
                      'success' => false,
-                     'message' => 'Mã giảm giá đã hết hạn.'
+                     'message' => 'Mã Voucher không hợp lệ, đã hết hạn hoặc hết lượt sử dụng.'
                  ]);
     }
 }

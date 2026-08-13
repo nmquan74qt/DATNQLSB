@@ -2,7 +2,7 @@
 
 # Hệ thống Quản lý Sân Bóng (Pitch Admin)
 
-Đây là hệ thống quản lý sân bóng mini (Pitch Admin) dành cho Đồ án Tốt nghiệp (DATN), được phát triển bằng Laravel 11. Hệ thống cho phép quản trị viên (Admin) quản lý sân bóng, lịch đặt sân, hóa đơn, khách hàng, nhân sự và cung cấp giao diện đặt sân trực tuyến cho khách hàng.
+Đây là hệ thống quản lý sân bóng mini (Pitch Admin) dành cho Đồ án Tốt nghiệp (DATN), được phát triển bằng Laravel 13. Hệ thống cho phép quản trị viên (Admin) quản lý sân bóng, lịch đặt sân, hóa đơn, khách hàng, nhân sự và cung cấp giao diện đặt sân trực tuyến cho khách hàng.
 
 ## 🚀 Tính năng nổi bật
 
@@ -22,7 +22,7 @@
 - **Hệ thống**: Chức năng tự động Backup Database (hỗ trợ SQLite/MySQL).
 
 ## 🛠 Tech Stack
-- **Framework**: Laravel 11 (PHP ^8.3|^8.4)
+- **Framework**: Laravel 13 (PHP ^8.3|^8.4)
 - **Frontend**: Blade Template, Tailwind CSS, Alpine.js, FontAwesome
 - **Database**: SQLite (Mặc định) hoặc MySQL
 - **Tooling**: Vite (cho biên dịch tài sản CSS/JS)
