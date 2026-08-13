@@ -292,14 +292,33 @@
                                 </div>
                             </div>
                             
-                            <div class="flex justify-between items-center mb-6 text-sm">
+                            <div class="flex justify-between items-center mb-4 text-sm">
                                 <span class="text-slate-600 whitespace-nowrap" x-text="selectedSlots.length > 0 ? (formatTime(selectedSlots[0].start_time) + ' - ' + formatTime(selectedSlots[selectedSlots.length-1].end_time)) : ''"></span>
                                 <span class="font-bold text-slate-800 whitespace-nowrap" x-text="formatCurrency(originalPrice)"></span>
                             </div>
 
+                            <!-- Voucher -->
+                            <div class="mb-4 pt-4 border-t border-slate-100">
+                                <p class="text-sm font-bold text-slate-700 mb-2"><i class="fa-solid fa-ticket text-emerald-500 mr-1"></i> Mã giảm giá</p>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="voucherInput" class="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm uppercase focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" placeholder="NHẬP MÃ">
+                                    <button @click="applyVoucher()" :disabled="isProcessingVoucher || !voucherInput || selectedSlots.length === 0" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors">
+                                        <span x-show="!isProcessingVoucher">Áp dụng</span>
+                                        <span x-show="isProcessingVoucher"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
+                                <div x-show="voucherMessage" class="text-xs mt-2 font-bold" :class="voucherSuccess ? 'text-emerald-500' : 'text-red-500'" x-html="voucherMessage"></div>
+                            </div>
+                            
+                            <!-- Discount display if applied -->
+                            <div x-show="discountAmount > 0" class="flex justify-between text-sm text-emerald-600 mb-4">
+                                <span>Giảm giá</span>
+                                <span class="font-bold" x-text="'-' + formatCurrency(discountAmount)"></span>
+                            </div>
+
                             <div class="flex justify-between items-center mb-6 pt-4 border-t border-slate-100">
                                 <span class="text-slate-600 font-medium whitespace-nowrap">Tổng cộng</span>
-                                <span class="text-2xl font-extrabold text-slate-900 whitespace-nowrap" x-text="formatCurrency(originalPrice)"></span>
+                                <span class="text-2xl font-extrabold text-emerald-600 whitespace-nowrap" x-text="formatCurrency(finalPrice)"></span>
                             </div>
 
                             <button @click="goToCheckout()" :disabled="selectedSlots.length === 0" class="w-full font-bold py-4 rounded-xl shadow-md transition-all transform" :class="selectedSlots.length > 0 ? 'bg-emerald-500 text-white hover:bg-emerald-600 hover:-translate-y-1' : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-70'">
@@ -395,17 +414,13 @@
                                 <span class="font-bold text-slate-800" x-text="formatCurrency(originalPrice)"></span>
                             </div>
 
-                            <!-- Voucher -->
-                            <div class="mb-6">
-                                <p class="text-sm font-bold text-slate-700 mb-2"><i class="fa-solid fa-ticket text-emerald-500 mr-1"></i> Mã giảm giá</p>
-                                <div class="flex gap-2">
-                                    <input type="text" x-model="voucherInput" class="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm uppercase focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" placeholder="NHẬP MÃ GIẢM GIÁ">
-                                    <button @click="applyVoucher()" :disabled="isProcessingVoucher || !voucherInput" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors">
-                                        <span x-show="!isProcessingVoucher">Áp dụng</span>
-                                        <span x-show="isProcessingVoucher"><i class="fa-solid fa-spinner fa-spin"></i></span>
-                                    </button>
+                            <!-- Voucher applied (Read only display) -->
+                            <div x-show="discountAmount > 0" class="mb-6 bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex items-center justify-between">
+                                <div>
+                                    <span class="text-sm font-bold text-emerald-700 flex items-center gap-1"><i class="fa-solid fa-ticket"></i> Đã áp dụng mã</span>
+                                    <span class="text-xs text-emerald-600 block mt-0.5" x-text="voucherCode"></span>
                                 </div>
-                                <div x-show="voucherMessage" class="text-xs mt-2 font-bold" :class="voucherSuccess ? 'text-emerald-500' : 'text-red-500'" x-html="voucherMessage"></div>
+                                <span class="font-bold text-emerald-600" x-text="'-' + formatCurrency(discountAmount)"></span>
                             </div>
 
                             <div class="space-y-3 mb-6 pt-4 border-t border-slate-100">
