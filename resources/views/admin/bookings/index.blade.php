@@ -168,7 +168,7 @@
                                     <select name="time_slot_id" required class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
                                         <option value="">-- Chọn Giờ --</option>
                                         @foreach(\App\Models\TimeSlot::all() as $slot)
-                                            <option value="{{ $slot->id }}">{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }} ({{ number_format($slot->price, 0, ',', '.') }}đ)</option>
+                                            <option value="{{ $slot->id }}">{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }} ({{ $slot->price_modifier > 0 ? '+' : '' }}{{ number_format($slot->price_modifier, 0, ',', '.') }}đ)</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -201,7 +201,7 @@
                                     <select name="time_slot_id" required class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
                                         <option value="">-- Chọn Giờ --</option>
                                         @foreach(\App\Models\TimeSlot::all() as $slot)
-                                            <option value="{{ $slot->id }}">{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }} ({{ number_format($slot->price, 0, ',', '.') }}đ)</option>
+                                            <option value="{{ $slot->id }}">{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }} ({{ $slot->price_modifier > 0 ? '+' : '' }}{{ number_format($slot->price_modifier, 0, ',', '.') }}đ)</option>
                                         @endforeach
                                     </select>
                                 </div>
