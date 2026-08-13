@@ -189,17 +189,28 @@
                             <div class="max-h-80 overflow-y-auto custom-scrollbar">
                                 <template x-for="notif in notifications" :key="notif.id">
                                     <a href="javascript:void(0);" class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex gap-3 transition-colors" @click="markAsRead(notif.id)">
-                                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-500">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                                             :class="{
+                                                 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-500': notif.data.type === 'success' || notif.data.type === 'payment',
+                                                 'bg-blue-100 dark:bg-blue-900/50 text-blue-500': notif.data.type === 'info',
+                                                 'bg-amber-100 dark:bg-amber-900/50 text-amber-500': notif.data.type === 'warning',
+                                                 'bg-pink-100 dark:bg-pink-900/50 text-pink-500': notif.data.type === 'promo',
+                                                 'bg-slate-100 dark:bg-slate-700/50 text-slate-500': !['success', 'info', 'warning', 'promo', 'payment'].includes(notif.data.type)
+                                             }">
                                             <i class="fa-solid"
                                                :class="{
-                                                   'fa-calendar-plus': notif.data.type === 'success' || notif.data.type === 'info',
-                                                   'fa-money-bill-wave': notif.data.type === 'payment' || notif.data.type === 'warning',
-                                                   'fa-bell': !['success', 'info', 'payment', 'warning'].includes(notif.data.type)
+                                                   'fa-check': notif.data.type === 'success',
+                                                   'fa-money-bill-wave': notif.data.type === 'payment',
+                                                   'fa-info': notif.data.type === 'info',
+                                                   'fa-exclamation': notif.data.type === 'warning',
+                                                   'fa-gift': notif.data.type === 'promo',
+                                                   'fa-bell': !['success', 'info', 'warning', 'promo', 'payment'].includes(notif.data.type)
                                                }"></i>
                                         </div>
                                         <div class="flex-1 pt-1">
                                             <p class="text-sm text-slate-800 dark:text-slate-200" :class="{ 'font-bold': notif.read_at === null, 'font-medium': notif.read_at !== null }" x-text="notif.data.title"></p>
-                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" x-text="formatTime(notif.created_at)"></p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1" x-text="notif.data.message"></p>
+                                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1" x-text="formatTime(notif.created_at)"></p>
                                         </div>
                                     </a>
                                 </template>
