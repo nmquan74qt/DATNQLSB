@@ -172,7 +172,7 @@
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading whitespace-nowrap">Bảng lương tháng này</h3>
                 <form action="{{ route('admin.staff.payroll') }}" method="POST" class="w-full xl:w-auto text-right">
                     @csrf
-                    <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-sm text-sm font-bold transition-colors">
+                    <button type="submit" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm text-sm font-bold transition-colors">
                         <i class="fa-solid fa-file-invoice-dollar mr-1"></i> Tính lương
                     </button>
                 </form>
