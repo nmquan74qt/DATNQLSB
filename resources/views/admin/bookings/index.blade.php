@@ -131,8 +131,14 @@
                             <i class="fa-solid fa-times text-lg"></i>
                         </button>
                     </div>
-                    <div class="p-6">
-                        <form action="{{ route('admin.bookings.store') }}" method="POST">
+                    <div class="p-6" x-data="{ bookingType: 'single' }">
+                        <div class="flex space-x-1 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl mb-6 inline-flex">
+                            <button @click="bookingType = 'single'" :class="{'bg-white dark:bg-slate-800 text-primary font-bold shadow-sm': bookingType === 'single', 'text-slate-500 hover:text-slate-700 dark:text-slate-400': bookingType !== 'single'}" type="button" class="px-5 py-2 rounded-lg text-sm transition-all">Lịch Đơn</button>
+                            <button @click="bookingType = 'batch'" :class="{'bg-white dark:bg-slate-800 text-primary font-bold shadow-sm': bookingType === 'batch', 'text-slate-500 hover:text-slate-700 dark:text-slate-400': bookingType !== 'batch'}" type="button" class="px-5 py-2 rounded-lg text-sm transition-all">Chuỗi / Giải Đấu</button>
+                        </div>
+
+                        <!-- Form Lịch Đơn -->
+                        <form x-show="bookingType === 'single'" action="{{ route('admin.bookings.store') }}" method="POST" x-transition>
                             @csrf
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
@@ -173,7 +179,56 @@
                             </div>
                             <div class="flex justify-end gap-3">
                                 <button type="button" @click="isModalOpen = false" class="px-6 py-2.5 rounded-xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors">Hủy</button>
-                                <button type="submit" class="px-6 py-2.5 rounded-xl font-medium text-white bg-primary hover:bg-blue-600 shadow-sm shadow-primary/30 transition-colors">Tạo Đặt Sân</button>
+                                <button type="submit" class="px-6 py-2.5 rounded-xl font-medium text-white bg-primary hover:bg-blue-600 shadow-sm shadow-primary/30 transition-colors">Tạo Lịch Đơn</button>
+                            </div>
+                        </form>
+
+                        <!-- Form Lịch Chuỗi -->
+                        <form x-show="bookingType === 'batch'" action="{{ route('admin.bookings.batch-store') }}" method="POST" x-cloak x-transition>
+                            @csrf
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Chọn Sân</label>
+                                    <select name="field_id" required class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
+                                        <option value="">-- Chọn Sân --</option>
+                                        @foreach(\App\Models\Field::where('status', 'available')->get() as $field)
+                                            <option value="{{ $field->id }}">{{ $field->name }} ({{ $field->fieldType->name ?? 'N/A' }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Khung Giờ</label>
+                                    <select name="time_slot_id" required class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
+                                        <option value="">-- Chọn Giờ --</option>
+                                        @foreach(\App\Models\TimeSlot::all() as $slot)
+                                            <option value="{{ $slot->id }}">{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }} ({{ number_format($slot->price, 0, ',', '.') }}đ)</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Từ Ngày</label>
+                                    <input type="date" name="start_date" required class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Đến Ngày</label>
+                                    <input type="date" name="end_date" required class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200">
+                                </div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Lặp lại vào các ngày</label>
+                                    <div class="flex flex-wrap gap-4">
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="days_of_week[]" value="1" class="rounded text-primary focus:ring-primary"> T2</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="days_of_week[]" value="2" class="rounded text-primary focus:ring-primary"> T3</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="days_of_week[]" value="3" class="rounded text-primary focus:ring-primary"> T4</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="days_of_week[]" value="4" class="rounded text-primary focus:ring-primary"> T5</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="days_of_week[]" value="5" class="rounded text-primary focus:ring-primary"> T6</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="days_of_week[]" value="6" class="rounded text-primary focus:ring-primary"> T7</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="days_of_week[]" value="0" class="rounded text-primary focus:ring-primary"> CN</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-3">
+                                <button type="button" @click="isModalOpen = false" class="px-6 py-2.5 rounded-xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors">Hủy</button>
+                                <button type="submit" class="px-6 py-2.5 rounded-xl font-medium text-white bg-primary hover:bg-blue-600 shadow-sm shadow-primary/30 transition-colors">Tạo Lịch Chuỗi</button>
                             </div>
                         </form>
                     </div>

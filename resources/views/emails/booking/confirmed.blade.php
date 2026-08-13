@@ -7,11 +7,11 @@ Cảm ơn bạn đã đặt sân tại hệ thống của chúng tôi. Dưới �
 
 **Mã đặt sân:** {{ $booking->booking_code }}  
 @php
-    $firstDetail = $booking->bookingDetails->first();
+    $firstDetail = $booking->details->first();
 @endphp
 **Sân bóng:** {{ $firstDetail->field->name ?? 'Không rõ' }}  
 **Thời gian bắt đầu:** {{ \Carbon\Carbon::parse($firstDetail->start_time)->format('H:i d/m/Y') }}  
-**Thời gian kết thúc:** {{ \Carbon\Carbon::parse($booking->bookingDetails->last()->end_time)->format('H:i d/m/Y') }}  
+**Thời gian kết thúc:** {{ \Carbon\Carbon::parse($booking->details->last()->end_time)->format('H:i d/m/Y') }}  
 **Tổng thanh toán:** {{ number_format($booking->total_amount) }} VNĐ
 
 <x-mail::button :url="route('home')">

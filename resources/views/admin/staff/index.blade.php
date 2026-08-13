@@ -118,8 +118,20 @@
         <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading">Chấm công hôm nay</h3>
-                <form action="{{ route('admin.staff.attendance') }}" method="POST">
+                <form action="{{ route('admin.staff.attendance') }}" method="POST" class="flex gap-2 items-center">
                     @csrf
+                    <select name="user_id" required class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200 text-sm">
+                        <option value="">-- Chọn nhân viên --</option>
+                        @foreach($staffs as $staff)
+                            <option value="{{ $staff->id }}">{{ $staff->name }}</option>
+                        @endforeach
+                    </select>
+                    <select name="status" required class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 focus:ring-2 focus:ring-primary/50 outline-none transition-all text-slate-800 dark:text-slate-200 text-sm">
+                        <option value="present">Có mặt</option>
+                        <option value="absent">Vắng mặt</option>
+                        <option value="late">Đi trễ</option>
+                        <option value="leave">Nghỉ phép</option>
+                    </select>
                     <button type="submit" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm text-sm font-bold transition-colors">
                         <i class="fa-solid fa-clock mr-1"></i> Điểm danh
                     </button>
